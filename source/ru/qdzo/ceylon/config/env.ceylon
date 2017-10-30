@@ -1,3 +1,6 @@
+import ceylon.collection {
+    HashMap
+}
 /*
   env[] object
   Environment();
@@ -13,10 +16,12 @@
 
 
 shared void registerLoader(Map<String,String>() loader) {
-    loaders = set(loaders.follow(loader));
+    _loaders = set(_loaders.follow(loader));
 }
 
-variable Set<Map<String,String>()> loaders = set {
+shared Set<Map<String,String>()> loaders = _loaders;
+
+variable Set<Map<String,String>()> _loaders = set {
     readJsonFile,
     readTomlFile,
     readPropertiesFile,
@@ -34,8 +39,11 @@ shared sealed class Environment() satisfies Map<String, String> {
     late Map<String, String> envVars = initEnv();
 
     Map<String, String> initEnv() {
-        assert(exists firstLoader = loaders.first);
-        return loaders.rest.fold(firstLoader(), (envMap, loader) => envMap.patch(loader()));
+        variable Map<String, String> tempMap = HashMap {};
+        for (loader in loaders) {
+            tempMap = tempMap.patch(loader());
+        }
+        return tempMap;
     }
 
     shared actual Boolean defines(Object key) => get(key) exists;
