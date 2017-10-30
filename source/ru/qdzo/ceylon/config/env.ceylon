@@ -1,16 +1,5 @@
-import ceylon.collection {
-    HashMap
-}
-import ceylon.interop.java {
-    CeylonIterable
-}
-
-import java.lang {
-    System
-}
-
 /*
-  env[]
+  env[] object
   Environment();
     loads config.json
     loads config.toml
@@ -26,42 +15,41 @@ import java.lang {
 shared void registerLoader(Map<String,String>() loader) {
     loaders = set(loaders.follow(loader));
 }
+
 variable Set<Map<String,String>()> loaders = set {
-    readJsonFile(),
-    readTomlFile(),
-    readPropertiesFile(),
-    readProfileFile(),
-    readCustomConfigFile(),
-    readCmdParams(),
-    readSystemEnv(),
-    readSystemProps(),
+    readJsonFile,
+    readTomlFile,
+    readPropertiesFile,
+    readProfileFile,
+    readCustomConfigFile,
+    readCmdParams,
+    readSystemEnv,
+    readSystemProps
 };
+
 "Crates environment singleton on first usage"
 shared late Environment env = Environment();
 shared sealed class Environment() satisfies Map<String, String> {
 
     late Map<String, String> envVars = initEnv();
+
+    Map<String, String> initEnv() {
+        assert(exists firstLoader = loaders.first);
+        return loaders.rest.fold(firstLoader(), (envMap, loader) => envMap.patch(loader()));
+    }
+
     shared actual Boolean defines(Object key) => get(key) exists;
 
-    shared actual String? get(Object key) =>
+    shared actual String? get(Object key) => envVars[key.string];
+
+    shared String? reactive(Object key)() => // TODO think about this
             process.propertyValue(key.string)
             else  process.environmentVariableValue(key.string)
             else process.namedArgumentValue(key.string)
             else envVars[key.string];
 
-    shared actual Iterator<String->String> iterator() => envVars.iterator(); // TODO add true iterator. with property/environment/args
+    shared actual Iterator<String->String> iterator() => envVars.iterator();
 
-    Map<String, String> initEnv() {
-        return readJsonFile()
-            .patch(readTomlFile())
-            .patch(readPropertiesFile())
-            .patch(readProfileFile())
-            .patch(readCustomConfigFile())
-            .patch(readCmdParams())
-            .patch(readSystemEnv())
-            .patch(readSystemProps());
-    };
-    
     shared actual Boolean equals(Object that) {
         if (is Environment that) {
             return envVars==that.envVars;
