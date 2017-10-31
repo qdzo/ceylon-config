@@ -20,10 +20,8 @@ shared abstract class Loader() {
 
 Map<String, String> readJsonFile() => map {""->""};
 Map<String, String> readTomlFile() => map {""->""};
-Map<String, String> readPropertiesFile() => map {""->""};
 Map<String, String> readProfileFile() => map {""->""};
 Map<String, String> readCustomConfigFile() => map {""->""};
-Map<String, String> readCmdParams() => map {""->""};
 
 object systemEnvLoader extends Loader() {
     load => let(javaEntries = CeylonIterable(System.getenv().entrySet()))
@@ -36,27 +34,24 @@ object systemPropsLoader extends Loader() {
 }
 
 object cmdParamsLoader extends Loader() {
-    load => HashMap { };
+    <String->String>? extractNamedArg(String namedArg) {
+        String[2]? nameVal = namedArg.trimLeading('-'.equals).split('='.equals).paired.first;
+        return if(exists nameVal) then nameVal[0] -> nameVal[1] else null;
+    }
+    
+    {<String->String>*} geatherSeparateNamedArgs({<Integer->String>*} args) =>
+            { for(i->arg in args)
+            if(arg.startsWith("-"),
+                exists _->val = args.find(forKey((i+1).equals)),
+                !val.startsWith("-"))
+            arg.trimLeading('-'.equals) -> val };
+
+    shared actual Map<String, String> load {
+        value indexedArgs = process.arguments.indexed;
+        value argsAsOneWord = indexedArgs.filter((_->arg) => arg.startsWith("-") && arg.contains("="));
+        value otherArgs = indexedArgs.filter((entry) => !entry in argsAsOneWord);
+        return map(indexedArgs*.item
+            .map(extractNamedArg).coalesced
+            .chain(geatherSeparateNamedArgs(otherArgs)));
+    }
 }
-//value args = arguments;
-//for (i in 0:args.size) {
-//            assert (exists arg = args[i]);
-//            if (arg.startsWith("-``name``=")) {
-//                return arg.removeInitial("-``name``=");
-//            }
-//            if (arg.startsWith("--``name``=")) {
-//                return arg.removeInitial("--``name``=");
-//            }
-//            if (arg == "-" + name ||
-//                arg == "--" + name) {
-//                return
-//                if (exists next = args[i+1],
-//                    !next.startsWith("-"))
-//                then next
-//                else null;
-//            }
-//        }
-//        else {
-//            return null;
-//        }
-//    }
