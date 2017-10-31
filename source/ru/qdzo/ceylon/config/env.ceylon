@@ -14,23 +14,28 @@ import ceylon.collection {
     system properties
 */
 
-
-shared void registerLoader(Map<String,String>() loader) {
-    _loaders = set(_loaders.follow(loader));
-}
-
-shared Set<Map<String,String>()> loaders = _loaders;
-
-variable Set<Map<String,String>()> _loaders = set {
+variable Set<Loader> _loaders = set {
     readJsonFile,
     readTomlFile,
     readPropertiesFile,
     readProfileFile,
+    systemEnvLoader,
     readCustomConfigFile,
-    readCmdParams,
-    readSystemEnv,
-    readSystemProps
+    cmdParamsLoader,
+    systemPropsLoader
 };
+
+"registers loader  with lowest priority"
+shared void registerLoader(Loader loader) {
+    _loaders = set(_loaders.follow(loader));
+}
+
+"registers loader  with lowest priority"
+shared void unregisterLoader(Loader loader) {
+    _loaders = set(_loaders.filter(not(loader.equals)));
+}
+
+shared Set<Loader> loaders = _loaders;
 
 "Crates environment singleton on first usage"
 shared late Environment env = Environment();
@@ -41,7 +46,7 @@ shared sealed class Environment() satisfies Map<String, String> {
     Map<String, String> initEnv() {
         variable Map<String, String> tempMap = HashMap {};
         for (loader in loaders) {
-            tempMap = tempMap.patch(loader());
+            tempMap = tempMap.patch(loader.load);
         }
         return tempMap;
     }
