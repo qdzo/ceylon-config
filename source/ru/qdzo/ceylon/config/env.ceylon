@@ -39,6 +39,7 @@ shared Set<Loader> loaders = _loaders;
 
 "Crates environment singleton on first usage"
 shared late Environment env = Environment();
+
 shared sealed class Environment() satisfies Map<String, String> {
 
     late Map<String, String> envVars = initEnv();
@@ -51,9 +52,9 @@ shared sealed class Environment() satisfies Map<String, String> {
         return tempMap;
     }
 
-    shared actual Boolean defines(Object key) => get(key) exists;
+    defines(Object key) => get(key) exists;
 
-    shared actual String? get(Object key) => envVars[key.string];
+    get(Object key) => envVars[key.string];
 
     shared String? reactive(Object key)() => // TODO think about this
             process.propertyValue(key.string)
@@ -61,17 +62,13 @@ shared sealed class Environment() satisfies Map<String, String> {
             else process.namedArgumentValue(key.string)
             else envVars[key.string];
 
-    shared actual Iterator<String->String> iterator() => envVars.iterator();
+    iterator() => envVars.iterator();
 
-    shared actual Boolean equals(Object that) {
-        if (is Environment that) {
-            return envVars==that.envVars;
-        }
-        else {
-            return false;
-        }
-    }
+    equals(Object that) =>
+            if (is Environment that)
+            then envVars==that.envVars
+            else false;
 
-    shared actual Integer hash => envVars.hash;
+    hash => envVars.hash;
 
 }
