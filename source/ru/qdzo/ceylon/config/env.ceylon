@@ -15,12 +15,11 @@ import ceylon.collection {
 */
 
 variable Set<Loader> _loaders = set {
-    readJsonFile,
-    readTomlFile,
-    readPropertiesFile,
-    readProfileFile,
-    systemEnvLoader,
-    readCustomConfigFile,
+//    readJsonFile,
+//    readTomlFile,
+//    readProfileFile,
+//    systemEnvLoader,
+//    readCustomConfigFile,
     cmdParamsLoader,
     systemPropsLoader
 };
