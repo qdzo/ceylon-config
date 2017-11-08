@@ -1,27 +1,17 @@
 import ceylon.collection {
-    HashMap,
-    ArrayList,
-    MutableMap
+    HashMap
 }
 import ceylon.file {
     File,
     parsePath,
-    lines,
-    current
+    lines
 }
 import ceylon.interop.java {
     CeylonIterable
 }
 import ceylon.json {
-    parseJson = parse,
-    JsonObject = Object,
-    JsonVisitor = Visitor,
-    JsonValue = Value,
-    JsonArray = Array,
-    visit
-}
-import ceylon.language.meta {
-    type
+    parseJson=parse,
+    JsonObject=Object
 }
 
 import java.lang {
@@ -90,21 +80,20 @@ class JsonFileLoader(String filename) extends Loader() {
         value fileContent = "\n".join(lines(file));
         "Json file should be with correct structure"
         assert(is JsonObject json = parseJson(fileContent));
-        return toPlainPath(json, "");
+        return toPlainPath(json, []);
     }
-
-    String joinPath(String one, String two) => one + "." + two;
 
     "convert nested objects to plain path with `.`(dot) separator
      *NOTE:* Array will be converted to string"
-    Map<String,String> toPlainPath(JsonObject json, String path) => map (
+    Map<String,String> toPlainPath(JsonObject json, [String*] path) => map (
         json.flatMap((key -> item) {
             switch(item)
             case (is JsonObject) {
-                return toPlainPath(item, joinPath(path, key));
+                return toPlainPath(item, path.append([key]));
             }
             else {
-                return { key -> (item?.string else "") };
+                value pathKey = ".".join(path.append([key]));
+                return { pathKey -> (item?.string else "") };
             }
         }));
 }
