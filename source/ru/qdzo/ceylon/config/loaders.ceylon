@@ -17,6 +17,10 @@ import ceylon.json {
 import java.lang {
     System
 }
+import ceylon.toml {
+    parseToml,
+    TomlTable
+}
 
 
 shared abstract class Loader() {
@@ -109,22 +113,21 @@ class TomlFileLoader(String filename) extends Loader() {
     shared actual Map<String,String> load {
         value fileContent = "\n".join(lines(file));
         "Toml file should be with correct structure"
-        assert(is JsonObject json = parseJson(fileContent));
-        return toPlainPath(json, "");
+        assert(is TomlTable toml = parseToml(fileContent));
+        return toPlainPath(toml, []);
     }
-
-    String joinPath(String one, String two) => one + "." + two;
 
     "convert nested objects to plain path with `.`(dot) separator
      *NOTE:* Array will be converted to string"
-    Map<String,String> toPlainPath(JsonObject json, String path) => map (
-        json.flatMap((key -> item) {
+    Map<String,String> toPlainPath(TomlTable toml, [String*] path) => map (
+        toml.flatMap((key -> item) {
             switch(item)
-            case (is JsonObject) {
-                return toPlainPath(item, joinPath(path, key));
+            case (is TomlTable) {
+                return toPlainPath(item, path.append([key]));
             }
             else {
-                return { key -> (item?.string else "") };
+                value pathKey = ".".join(path.append([key]));
+                return { pathKey -> item.string };
             }
         }));
 }
