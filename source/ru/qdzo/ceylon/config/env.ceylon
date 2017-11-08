@@ -1,25 +1,43 @@
 import ceylon.collection {
     HashMap
 }
+import ru.qdzo.ceylon.config.loaders {
+    cmdParamsLoader,
+    systemPropsLoader,
+    defaultJsonConfigLoader,
+    defaultTomlConfigLoader,
+    CustomConfigLoader,
+    systemEnvLoader
+}
 /*
-  env[] object
-  Environment();
     loads config.json
     loads config.toml
-    loads config.properties
-    profiles files?
-    custom config file
-    cmd params
-    ENV
-    system properties
+    loads profile configs
+    loads ENV vars
+    loads custom config file
+    loads cmd params
+    loads system properties
 */
 
+String? profileJsonConfig =>
+        let(profile = process.environmentVariableValue("PROFILE"))
+        if (exists profile)
+        then "profile/``profile``/config.json"
+        else null;
+
+String? profileTomlConfig =>
+        let(profile = process.environmentVariableValue("PROFILE"))
+        if (exists profile)
+        then "profile/``profile``/config.toml"
+        else null;
+
 variable Set<Loader> _loaders = set {
-//    readJsonFile,
-//    readTomlFile,
-//    readProfileFile,
-//    systemEnvLoader,
-//    readCustomConfigFile,
+    defaultJsonConfigLoader,
+    defaultTomlConfigLoader,
+    CustomConfigLoader(profileJsonConfig else ""),
+    CustomConfigLoader(profileTomlConfig else ""),
+    systemEnvLoader,
+    CustomConfigLoader(process.namedArgumentValue("config") else ""),
     cmdParamsLoader,
     systemPropsLoader
 };
