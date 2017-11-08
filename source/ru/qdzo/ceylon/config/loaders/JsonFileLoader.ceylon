@@ -11,6 +11,9 @@ import ru.qdzo.ceylon.config {
     Loader
 }
 
+"Loads config.json stored in same dir where application starts"
+shared JsonFileLoader defaultJsonConfigLoader = JsonFileLoader("config.json");
+
 "Loads variables from json config.
  all nested path converts to plain with `dot` separator"
 shared class JsonFileLoader(String filename) extends Loader() {
