@@ -22,13 +22,13 @@ import ru.qdzo.ceylon.config.loaders {
 String? profileJsonConfig =>
         let(profile = process.environmentVariableValue("PROFILE"))
         if (exists profile)
-        then "profile/``profile``/config.json"
+        then "env/``profile``/config.json"
         else null;
 
 String? profileTomlConfig =>
         let(profile = process.environmentVariableValue("PROFILE"))
         if (exists profile)
-        then "profile/``profile``/config.toml"
+        then "env/``profile``/config.toml"
         else null;
 
 variable Set<Loader> _loaders = set {
