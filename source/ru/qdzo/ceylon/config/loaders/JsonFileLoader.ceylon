@@ -8,7 +8,8 @@ import ceylon.json {
     parseJson = parse
 }
 import ru.qdzo.ceylon.config {
-    Loader
+    Loader,
+    toDotKey
 }
 
 "Loads config.json stored in same dir where application starts"
@@ -40,7 +41,7 @@ shared class JsonFileLoader(String filename) extends Loader() {
             }
             else {
                 value pathKey = ".".join(path.append([key]));
-                return { pathKey -> (item?.string else "") };
+                return { toDotKey(pathKey) -> (item?.string else "") };
             }
         }));
 }

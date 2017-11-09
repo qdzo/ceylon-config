@@ -6,8 +6,17 @@ shared abstract class Loader() {
     hash => load.hash;
 }
 
-Map<String, String> readJsonFile() => map {""->""};
-Map<String, String> readTomlFile() => map {""->""};
-Map<String, String> readProfileFile() => map {""->""};
-Map<String, String> readCustomConfigFile() => map {""->""};
 
+"Transforms keys to unified format.
+ From `SCREAM_CASE` and `kebub-case` to `dot.case`"
+shared String toDotKey(String key) {
+    value newKey =
+           key.lowercased
+          .replace("_", ".")
+          .replace("-", ".");
+    if(newKey != key) {
+        log.info("Warn: key ``key`` has been corrected to ``newKey``");
+        return newKey;
+    }
+  return key;
+}

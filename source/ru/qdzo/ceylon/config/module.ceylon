@@ -7,4 +7,5 @@ module ru.qdzo.ceylon.config "1.0.0" {
     import ceylon.file "1.3.3";
     shared import ceylon.json "1.3.3";
     import ceylon.toml "1.3.3";
+    import ceylon.logging "1.3.3";
 }

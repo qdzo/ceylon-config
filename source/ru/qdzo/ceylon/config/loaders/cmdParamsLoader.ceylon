@@ -1,19 +1,22 @@
 import ru.qdzo.ceylon.config {
-    Loader
+    Loader,
+    toDotKey
 }
 
 "Loads variables from command parameters"
 shared object cmdParamsLoader extends Loader() {
 
-    <String->String>? extractNamedArg(String namedArg) {
-        String[2]? nameVal = namedArg
-                    .trimLeading('-'.equals)
-                    .split('='.equals)
-                    .paired.first;
-        return if(exists nameVal)
-                 then nameVal[0] -> nameVal[1]
-                 else null;
+  <String->String>? extractNamedArg(String namedArg) {
+    String[2]? nameVal = namedArg
+          .trimLeading('-'.equals)
+          .split('='.equals)
+          .paired.first;
+    if(exists nameVal) {
+        value key = toDotKey(nameVal[0]);
+        return key -> nameVal[1];
     }
+    return null;
+  }
 
     /*
       get indexed sequence of args. each index is an arg-position in cmd.
@@ -21,12 +24,12 @@ shared object cmdParamsLoader extends Loader() {
       and 2nd element folowing the 1st and not starts with hyphen.
       example: '--name Victory'
     */
-    {<String->String>*} geatherSeparateNamedArgs({<Integer->String>*} args) =>
-            { for(i->arg in args)
-            if(arg.startsWith("-"),
-                exists _->val = args.find(forKey((i+1).equals)),
-                !val.startsWith("-"))
-            arg.trimLeading('-'.equals) -> val };
+    {<String->String>*} geatherSeparateNamedArgs({<Integer->String>*} args)
+          => { for(i->arg in args)
+                  if(arg.startsWith("-"),
+                    exists _->val = args.find(forKey((i+1).equals)),
+                     !val.startsWith("-"))
+                        toDotKey(arg.trimLeading('-'.equals)) -> val };
 
     /*
       split cmd-params into 2 categories:
