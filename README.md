@@ -11,7 +11,7 @@ and [yogthos/config](https://github.com/yogthos/config) project.
 Configuration is resolved in next order:
 
 1. config `json/toml` file in current dir 
-2. profile `json/toml` file^^*^^
+2. profile `json/toml` file
 3. Environment variables
 4. custom config file `json/toml`, specified by cmd parameter `--config` 
 5. cmd parameters
