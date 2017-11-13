@@ -61,9 +61,9 @@ shared void run() {
 }
 ```
 
-### Use system environment or cmd parameters
+### Use system environment variables or cmd parameters
 
-You can override config variables by specifying system environment or cmd parameters
+You can override config variables by specifying system environment variables or cmd parameters
 
 Set environment before application start-up
 
@@ -96,7 +96,7 @@ We need to create `config` dir in project root and then create `dev`, `test` `st
 
 In each of these dirs create config file: `config.json` or `config.toml`.
 
-We must get such paths in project root:
+You must get such paths in project root:
 
 * `config/dev/config.json`
 * `config/test/config.toml`
@@ -104,12 +104,9 @@ We must get such paths in project root:
 
 To specify profile config you must set environment variable `PROFILE` to needed profile.
 
-example in bash: 
-
 ```bash 
 export PROFILE=dev
 ```
-
 
 **NOTE**: all variables that gathered from different sources are transformed to one format:
 * all chars lowercased
@@ -119,7 +116,7 @@ This gives you some advantages:
 * a freedom to specify variables according standards (uppercased with upderscore in *env*, lowercased with dot in *java-properties*)
 * to use variables without fear to forget they format.
 
-The library prints warnings when it formats variables, so be attentive
+> The library prints warnings when it formats variables, so be attentive
 
 ### Caveats: 
 
@@ -130,7 +127,7 @@ This is made to exclude ugly and buggy variable-names folowed by index - `foo.1,
 
 ## Advanced
 
-You can create custom config loader by extending `Loader` class and registering it in system.
+You can create custom config loader by extending `Loader` class and registering it in the system.
 
 Implementing loader
 
@@ -142,7 +139,7 @@ shared object mySecretLoader extends Loader() {
 
 You need to apply `sanitize` function for key, to bring it to common format (see above).
 
-registering loader
+Registering loader
 
 ```
 registerLoader(mySecretLoader);
