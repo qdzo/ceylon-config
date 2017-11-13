@@ -3,7 +3,7 @@ import ceylon.interop.java {
 }
 import ru.qdzo.ceylon.config {
     Loader,
-    toDotKey
+    sanitize
 }
 import java.lang {
     System
@@ -15,5 +15,5 @@ import ceylon.collection {
 "Loads variables from java system properties"
 shared object systemPropsLoader extends Loader() {
     load => let(javaEntries = CeylonIterable(System.properties.entrySet()))
-    HashMap { *javaEntries.map((entry) => toDotKey(entry.key.string) -> entry.\ivalue.string) };
+    HashMap { *javaEntries.map((entry) => sanitize(entry.key.string) -> entry.\ivalue.string) };
 }

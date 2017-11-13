@@ -8,8 +8,8 @@ shared abstract class Loader() {
 
 
 "Transforms keys to unified format.
- From `SCREAM_CASE` and `kebub-case` to `dot.case`"
-shared String toDotKey(String key) {
+ From `SCREAM_CASE` and `kebab-case` to `dot.case`"
+shared String sanitize(String key) {
     value newKey =
            key.lowercased
           .replace("_", ".")

@@ -9,7 +9,7 @@ import ceylon.toml {
 }
 import ru.qdzo.ceylon.config {
     Loader,
-    toDotKey
+    sanitize
 }
 
 "Loads config.toml stored in same dir where application starts"
@@ -41,7 +41,7 @@ shared class TomlFileLoader(String filename) extends Loader() {
             }
             else {
                 value pathKey = ".".join(path.append([key]));
-                return { toDotKey(pathKey) -> item.string };
+                return { sanitize(pathKey) -> item.string };
             }
         }));
 }
