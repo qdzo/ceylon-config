@@ -46,12 +46,12 @@ shared Set<Loader> loaders = _loaders;
 String? profileJsonConfig =>
         let(profile = process.environmentVariableValue("PROFILE"))
         if (exists profile)
-        then "env/``profile``/config.json"
+        then "config/``profile``/config.json"
         else null;
 
 String? profileTomlConfig =>
         let(profile = process.environmentVariableValue("PROFILE"))
         if (exists profile)
-        then "env/``profile``/config.toml"
+        then "config/``profile``/config.toml"
         else null;
 
