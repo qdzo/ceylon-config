@@ -14,6 +14,6 @@ import java.lang {
 
 "Loads variables from system environment variables"
 shared object systemEnvLoader extends Loader() {
-    load => let(javaEntries = CeylonIterable(System.getenv().entrySet()))
-    HashMap { *javaEntries.map((entry) => sanitize(entry.key.string) -> entry.\ivalue.string) };
+    load => let(jEnvVars = CeylonIterable(System.getenv().entrySet()))
+    HashMap { for(entry in jEnvVars) sanitize(entry.key.string) -> entry.\ivalue.string };
 }

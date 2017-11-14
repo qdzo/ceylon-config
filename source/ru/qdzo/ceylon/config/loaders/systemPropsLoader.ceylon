@@ -14,6 +14,6 @@ import ceylon.collection {
 
 "Loads variables from java system properties"
 shared object systemPropsLoader extends Loader() {
-    load => let(javaEntries = CeylonIterable(System.properties.entrySet()))
-    HashMap { *javaEntries.map((entry) => sanitize(entry.key.string) -> entry.\ivalue.string) };
+    load => let(javaPrors = CeylonIterable(System.properties.entrySet()))
+    HashMap { for(prop in javaPrors) sanitize(prop.key.string) -> prop.\ivalue.string };
 }
