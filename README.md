@@ -88,11 +88,11 @@ ceylon run app.module --config=my/custom/config.toml
 
 Setting up mutliple configurations is done by *profiles* dirs. 
 
-Profile dir is a dir that placed by path `{project_root}/config/{profile-name}`. 
+> Ceylon doesn't force us to use any kind of configuration for different dev environments - we have full freedom in this place.
 
-> Because Ceylon doesn't force us to use any kind of configuration for different dev environments - we have full freedom in this place.
+Profile dir is a dir that placed in path `{project_root}/config/{profile-name}`. 
 
-We need to create `config` dir in project root and then create `dev`, `test` `stage` (whatever...) dirs nested in `config` dir.
+You need to create `config` dir in project root and then create `dev`, `test` `stage` (whatever...) dirs nested in `config` dir.
 
 In each of these dirs create config file: `config.json` or `config.toml`.
 
