@@ -65,9 +65,9 @@ shared void unregisterLoader(Loader loader) {
 shared Set<Loader> loaders = _loaders;
 
 "Crates environment singleton on first usage"
-shared late Environment env = Environment();
+shared late Environment env = Environment(loaders);
 
-shared sealed class Environment() satisfies Map<String, String> {
+shared sealed class Environment({Loader*} loaders) satisfies Map<String, String> {
 
     late Map<String, String> envVars = initEnv();
 
