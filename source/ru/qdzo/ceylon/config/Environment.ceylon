@@ -1,14 +1,6 @@
 import ceylon.collection {
     HashMap
 }
-import ru.qdzo.ceylon.config.loaders {
-    cmdParamsLoader,
-    systemPropsLoader,
-    defaultJsonConfigLoader,
-    defaultTomlConfigLoader,
-    CustomConfigLoader,
-    systemEnvLoader
-}
 import ceylon.time {
     Date,
     Time,
