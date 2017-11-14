@@ -1,3 +1,4 @@
+"Template class for creating custom config-loaders"
 shared abstract class Loader() {
     shared formal Map<String, String> load;
     equals(Object that) => switch (that)
