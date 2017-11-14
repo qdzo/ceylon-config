@@ -67,6 +67,9 @@ shared Set<Loader> loaders = _loaders;
 "Crates environment singleton on first usage"
 shared late Environment env = Environment(loaders);
 
+"Presents config-map of different configuration sources.
+ Load environment variables from loaders.
+ The later loader have higher priority and can override previously setted variable"
 shared sealed class Environment({Loader*} loaders) satisfies Map<String, String> {
 
     late Map<String, String> envVars = initEnv();
