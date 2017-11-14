@@ -1,6 +1,7 @@
 import ceylon.test {
     test,
-    assertEquals
+    assertEquals,
+    assertThatException
 }
 import ru.qdzo.ceylon.config {
     sanitize,
@@ -38,3 +39,49 @@ shared void environmentShouldOverrideVariablesInRightOrder() {
     assertEquals(val, "second");
 }
 
+test
+shared void shouldParseStrings() {
+    object loader extends Loader() {
+        load => createMap {
+            "string" -> "first",
+            "integer" -> "10",
+            "float" -> "11.1",
+            "boolean" -> "true" // TODO add date/time/datetime
+        };
+    }
+
+    value env = Environment({loader});
+    String str = env.getString("string");
+    Integer int = env.getInteger("integer");
+    Float flt = env.getFloat("float");
+    Boolean bool = env.getBoolean("boolean");
+    assertEquals(str, "first");
+    assertEquals(int, 10);
+    assertEquals(flt, 11.1);
+    assertEquals(bool, true);
+
+    // non existing keys
+    assertThatException((){
+        env.getString("str");
+    });
+    assertThatException((){
+        env.getInteger("int");
+    });
+    assertThatException((){
+        env.getFloat("flt");
+    });
+    assertThatException((){
+        env.getBoolean("bool");
+    });
+
+    // wrong type values
+    assertThatException((){
+        env.getInteger("float");
+    });
+    assertThatException((){
+        env.getFloat("boolean");
+    });
+    assertThatException((){
+        env.getBoolean("string");
+    });
+}
