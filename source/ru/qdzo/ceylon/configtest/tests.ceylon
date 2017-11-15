@@ -10,6 +10,14 @@ import ru.qdzo.ceylon.config {
 }
 
 import ceylon.language { createMap = map }
+import ceylon.time {
+    Date,
+    Time,
+    DateTime,
+    createDate = date,
+    createTime = time,
+    createDateTime = dateTime
+}
 
 test
 shared void sanitizeShouldWork() {
@@ -39,49 +47,83 @@ shared void environmentShouldOverrideVariablesInRightOrder() {
     assertEquals(val, "second");
 }
 
-test
-shared void shouldParseStrings() {
-    object loader extends Loader() {
+Environment testEnv = Environment {
+    object extends Loader() {
         load => createMap {
             "string" -> "first",
             "integer" -> "10",
             "float" -> "11.1",
-            "boolean" -> "true" // TODO add date/time/datetime
+            "boolean" -> "true",
+            "date" -> "2017-11-15",
+            "time" -> "19:44:54.301",
+            "datetime" -> "2017-11-15T19:44:54.303"
         };
     }
+};
 
-    value env = Environment({loader});
-    String str = env.getString("string");
-    Integer int = env.getInteger("integer");
-    Float flt = env.getFloat("float");
-    Boolean bool = env.getBoolean("boolean");
+test
+shared void shouldParseStrings() {
+    String str = testEnv.getString("string");
+    Integer int = testEnv.getInteger("integer");
+    Float flt = testEnv.getFloat("float");
+    Boolean bool = testEnv.getBoolean("boolean");
+    Date date = testEnv.getDate("date");
+    Time time = testEnv.getTime("time");
+    DateTime dateTime = testEnv.getDateTime("datetime");
     assertEquals(str, "first");
     assertEquals(int, 10);
     assertEquals(flt, 11.1);
     assertEquals(bool, true);
+    assertEquals(date, createDate(2017, 11, 15));
+    assertEquals(time, createTime(19, 44, 54, 301));
+    assertEquals(dateTime, createDateTime(2017, 11, 15, 19, 44, 54, 303));
+}
 
+test
+shared void shouldThrowExceptionOnGettingNonExistentVariable() {
     // non existing keys
     assertThatException((){
-        env.getString("str");
+        testEnv.getString("str");
     });
     assertThatException((){
-        env.getInteger("int");
+        testEnv.getInteger("int");
     });
     assertThatException((){
-        env.getFloat("flt");
+        testEnv.getFloat("flt");
     });
     assertThatException((){
-        env.getBoolean("bool");
+        testEnv.getBoolean("bool");
+    });
+    assertThatException((){
+        testEnv.getDate("dat");
+    });
+    assertThatException((){
+        testEnv.getTime("tim");
+    });
+    assertThatException((){
+        testEnv.getDateTime("dattim");
     });
 
-    // wrong type values
+}
+
+test
+shared void shouldThrowExceptionOnGettingWrongVariableType() {
     assertThatException((){
-        env.getInteger("float");
+        testEnv.getInteger("float");
     });
     assertThatException((){
-        env.getFloat("boolean");
+        testEnv.getFloat("boolean");
     });
     assertThatException((){
-        env.getBoolean("string");
+        testEnv.getBoolean("string");
+    });
+    assertThatException((){
+        testEnv.getDate("time");
+    });
+    assertThatException((){
+        testEnv.getTime("datetime");
+    });
+    assertThatException((){
+        testEnv.getDateTime("date");
     });
 }
