@@ -33,7 +33,7 @@ import ru.qdzo.ceylon.config "0.0.1";
 
 Library looks for the config file in current dir and *profiles* dirs. 
 After that it loads system environment variables, cmd parameters, 
-system properties and merges them in one `HashMap<String,String> env` object.
+system properties and merges them in one `HashMap<String,String>` that accessable as `env` toplevel object.
 
 ### Use Configuration file
 
@@ -54,8 +54,8 @@ Use `env` object to obtain variables.
 import ru.qdzo.ceylon.config { env }
 
 shared void run() {
-    assert(exists dbHost = env["database.host"]);
-    assert(is Integer dbPort = Integer.parse(env["database.port"]));
+    String dbHost = env.getString("database.host");
+    Integer dbPort = env.getInteger("database.port");
     value connection = connectDb(dbHost, dbPort);
     ...
 }
