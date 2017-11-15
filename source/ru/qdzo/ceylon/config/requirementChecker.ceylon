@@ -26,16 +26,23 @@ class RequireEnvAnnotation(shared String* envs) satisfies
 shared annotation RequireEnvAnnotation requireEnv( String* envs)
         => RequireEnvAnnotation(*envs);
 
+"Runtime modules exclude `ceylon.*` and `com.redhat.*`"
+Module[] excludeLanguageModules = [
+    for (mod in modules.list)
+        if(!mod.qualifiedName.startsWith("ceylon") &&
+           !mod.qualifiedName.startsWith("com.redhat"))
+            mod ];
+
 "Scan given modules for environment requirements.
  By default scan all runtime modules.
  Throws exception when requirement violated"
 see(`class RequireEnvAnnotation`)
 throws(`class AssertionError`)
-shared void scanEnvRequirements(Module[] mods = modules.list) {
+shared void scanEnvRequirements(Module[] mods = excludeLanguageModules) {
     MutableSet<String> vars = HashSet<String>();
     for (mod in mods) {
         for (pack in mod.members) {
-            
+
             value members = pack
                 .annotatedMembers<PossibleDeclaraitons, RequireEnvAnnotation>();
             
