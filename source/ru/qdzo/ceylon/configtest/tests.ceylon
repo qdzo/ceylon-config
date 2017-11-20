@@ -127,3 +127,43 @@ shared void shouldThrowExceptionOnGettingWrongVariableType() {
         testEnv.getDateTime("date");
     });
 }
+
+test
+shared void shouldParseStrings2() {
+    assert(is String str = testEnv.getStringOrNull("string"));
+    assert(is Integer int = testEnv.getIntegerOrNull("integer"));
+    assert(is Float flt = testEnv.getFloatOrNull("float"));
+    assert(is Boolean bool = testEnv.getBooleanOrNull("boolean"));
+    assert(is Date date = testEnv.getDateOrNull("date"));
+    assert(is Time time = testEnv.getTimeOrNull("time"));
+    assert(is DateTime dateTime = testEnv.getDateTimeOrNull("datetime"));
+    assertEquals(str, "first");
+    assertEquals(int, 10);
+    assertEquals(flt, 11.1);
+    assertEquals(bool, true);
+    assertEquals(date, createDate(2017, 11, 15));
+    assertEquals(time, createTime(19, 44, 54, 301));
+    assertEquals(dateTime, createDateTime(2017, 11, 15, 19, 44, 54, 303));
+}
+
+test
+shared void shouldReturnNullOnGettingNonExistentVariable() {
+    // non existing keys
+    assert(is Null str = testEnv.getStringOrNull("str"));
+    assert(is Null int = testEnv.getIntegerOrNull("int"));
+    assert(is Null flt = testEnv.getFloatOrNull("flt"));
+    assert(is Null bool = testEnv.getBooleanOrNull("bool"));
+    assert(is Null dat = testEnv.getDateOrNull("dat"));
+    assert(is Null tim = testEnv.getTimeOrNull("tim"));
+    assert(is Null dattim = testEnv.getDateTimeOrNull("dattim"));
+}
+
+test
+shared void shouldReturnNullOnGettingWrongVariableType() {
+    assert(is Null int = testEnv.getIntegerOrNull("float"));
+    assert(is Null flt = testEnv.getFloatOrNull("boolean"));
+    assert(is Null boo = testEnv.getBooleanOrNull("string"));
+    assert(is Null dat = testEnv.getDateOrNull("time"));
+    assert(is Null tim = testEnv.getTimeOrNull("datetime"));
+    assert(is Null dattim = testEnv.getDateTimeOrNull("date"));
+}
