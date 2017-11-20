@@ -1,6 +1,11 @@
+
 "Run the module `ru.qdzo.ceylon.config`."
 
+// requireEnv ("user.home", "date")
 shared void run() {
-//    env.each(print);
-    print(env.getFloat("java.class.version"));
+//    addLogWriter(writeSimpleLog);
+   env.each(print);
+    // value hello = ";";
+    // print(env.getFloat("java.class.version"));
+    // checkEnvRequirements();
 }

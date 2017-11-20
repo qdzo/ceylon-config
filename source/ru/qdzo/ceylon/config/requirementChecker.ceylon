@@ -38,20 +38,20 @@ Module[] excludeLanguageModules = [
  Throws exception when requirement violated"
 see(`class RequireEnvAnnotation`)
 throws(`class AssertionError`)
-shared void scanEnvRequirements(Module[] mods = excludeLanguageModules) {
+shared void checkEnvRequirements(Module[] mods = excludeLanguageModules) {
     MutableSet<String> vars = HashSet<String>();
     for (mod in mods) {
         for (pack in mod.members) {
 
             value members = pack
                 .annotatedMembers<PossibleDeclaraitons, RequireEnvAnnotation>();
-            
+
             if(nonempty members) {
                 {String*} requirements = members
                     .flatMap((PossibleDeclaraitons fd)
                         => fd.annotations<RequireEnvAnnotation>()
                              .flatMap(RequireEnvAnnotation.envs));
-                
+
                 vars.addAll(requirements);
             }
         }
