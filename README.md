@@ -33,7 +33,7 @@ import ru.qdzo.ceylon.config "0.0.1";
 
 Library looks for the config file in current dir and *profiles* dirs. 
 After that it loads system environment variables, cmd parameters, 
-system properties and merges them in one `HashMap<String,String>` that accessable as `env` toplevel object.
+system properties and merges them in one `HashMap<String,String>` that accessible as `env` top-level object.
 
 ### Use Configuration file
 
@@ -54,9 +54,12 @@ Use `env` object to obtain variables.
 import ru.qdzo.ceylon.config { env }
 
 shared void run() {
-    String dbHost = env.getString("database.host");
-    Integer dbPort = env.getInteger("database.port");
-    value connection = connectDb(dbHost, dbPort);
+    String dbHost = env.getString("database.host");            // asserts value existence
+    Integer dbPort = env.getInteger("database.port");          // asserts existence and try parse-integer 
+    String? dbUser = env.getStringOrNull("database.user");     // optional parameter
+    String? dbPass = env["database.password"];                 // env satisfies Map<String,String>
+    
+    value connection = connectDb(dbHost, dbPort, dbUser, dbPass);
     ...
 }
 ```
@@ -88,7 +91,7 @@ ceylon run app.module --config=my/custom/config.toml
 
 Setting up mutliple configurations is done by *profiles* dirs. 
 
-> Ceylon doesn't force us to use any kind of configuration for different dev environments - we have full freedom in this place.
+> Ceylon doesn't force us to use any kind of configuration for different dev environments.
 
 Profile dir is a dir that placed in path `{project_root}/config/{profile-name}`. 
 
@@ -109,11 +112,11 @@ export PROFILE=dev
 ```
 
 **NOTE**: all variables that gathered from different sources are transformed to one format:
-* all chars lowercased
+* all chars lower-cased
 * hyphen (`-`) and underscore (`_`) replaced with dot (`.`)
 
 This gives you some advantages:
-* a freedom to specify variables according standards (uppercased with upderscore in *env*, lowercased with dot in *java-properties*)
+* a freedom to specify variables according standards (upper-cased with underscore in *env*, lower-cased with dot in *java-properties*)
 * to use variables without fear to forget they format.
 
 > The library prints warnings when it formats variables, so be attentive
@@ -121,7 +124,7 @@ This gives you some advantages:
 ### Caveats: 
 
 `ceylon-config` doesn't support arrays in json: it converts them to string. 
-This is made to exclude ugly and buggy variable-names folowed by index - `foo.1, foo.2.name`. 
+This is made to exclude ugly and buggy variable-names followed by index - `foo.1, foo.2.name`. 
 > Because position is matter in sequence.
 
 
