@@ -130,6 +130,31 @@ This is made to exclude ugly and buggy variable-names followed by index - `foo.1
 
 ## Advanced
 
+### Using env in non-`run` method
+
+If you want to use `env` variables somewhere in the project and you want to be sure that variable present at application startup,
+you would annotate your method with `requiredEnv` annotation and call `checkEnvRequirements` in run method.
+
+```ceylon
+requiredEnv("web.host", "web.port") // method required some envirnment variables
+shared startServer() {
+    String host = env.getString("web.host");
+    Integer port = env.getInteger("web.port");
+    value server = newServer({});
+    server.start(SocketAddress(host, port));
+}
+
+
+shared void run() {
+    checkEnvRequirements(`module`); // search for `requredEnv` annotaion in current-module and check env existence
+    ...
+    Thread.sleep(10_000)
+    serverStart();
+}
+```
+
+### Custom loaders
+
 You can create custom config loader by extending `Loader` class and registering it in the system.
 
 Implementing loader
