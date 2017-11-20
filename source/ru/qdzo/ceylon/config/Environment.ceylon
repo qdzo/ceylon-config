@@ -92,6 +92,69 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
         return booleanVal;
     }
 
+    "Get `String` value for given key or null if value is not present or can not be parsed"
+    shared String? getStringOrNull(Object key){
+        try {
+            return getString(key);
+        } catch(AssertionError ae) {
+            return null;
+        }
+    }
+
+    "Get `Integer` value for given key or null if value is not present or can not be parsed"
+    shared Integer? getIntegerOrNull(Object key){
+        try {
+            return getInteger(key);
+        } catch(AssertionError ae) {
+            return null;
+        }
+    }
+
+    "Get `Float` value for given key or null if value is not present or can not be parsed"
+    shared Float? getFloatOrNull(Object key){
+        try {
+            return getFloat(key);
+        } catch(AssertionError ae) {
+            return null;
+        }
+    }
+
+    "Get `Date` value for given key or null if value is not present or can not be parsed"
+    shared Date? getDateOrNull(Object key){
+        try {
+            return getDate(key);
+        } catch(AssertionError ae) {
+            return null;
+        }
+    }
+
+    "Get `Time` value for given key or null if value is not present or can not be parsed"
+    shared Time? getTimeOrNull(Object key){
+        try {
+            return getTime(key);
+        } catch(AssertionError ae) {
+            return null;
+        }
+    }
+
+    "Get `DateTime` value for given key or null if value is not present or can not be parsed"
+    shared DateTime? getDateTimeOrNull(Object key){
+        try {
+            return getDateTime(key);
+        } catch(AssertionError ae) {
+            return null;
+        }
+    }
+
+    "Get `Boolean` value for given key or null if value is not present or can not be parsed"
+    shared Boolean? getBooleanOrNull(Object key){
+        try {
+            return getBoolean(key);
+        } catch(AssertionError ae) {
+            return null;
+        }
+    }
+
     shared String? reactive(Object key)() => // TODO think about this
             process.propertyValue(key.string)
             else  process.environmentVariableValue(key.string)
