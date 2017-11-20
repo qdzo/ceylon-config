@@ -1,0 +1,9 @@
+{
+    "name": "JsonLoader",
+    "version": "1.0.0",
+    "info": {
+        "day": "01.11.17",
+        "time": "00.17",
+        "other": ["one", {"one": 1}]
+    }
+}

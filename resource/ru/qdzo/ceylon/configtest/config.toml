@@ -1,0 +1,10 @@
+[user]
+name="Bob"
+age=80
+
+[server]
+db="private"
+user="bob"
+pass="secret"
+port=3500
+host="ghost.net"
