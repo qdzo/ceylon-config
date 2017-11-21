@@ -155,11 +155,13 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
         }
     }
 
+/*
     shared String? reactive(Object key)() => // TODO think about this
             process.propertyValue(key.string)
             else  process.environmentVariableValue(key.string)
             else process.namedArgumentValue(key.string)
             else envVars[key.string];
+*/
 
     iterator() => envVars.iterator();
 
