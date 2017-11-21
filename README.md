@@ -43,7 +43,9 @@ Create `config.json` file in project root.
 {
   "database": {
     "host": "localhost",
-    "port": 5144
+    "port": 5144,
+    "user": "admin",
+    "password": "secret"
   }
 }
 ```
