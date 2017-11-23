@@ -1,10 +1,16 @@
+import ceylon.collection {
+    partition,
+    HashMap,
+    MutableMap
+}
 import ceylon.language.meta {
     annotations
 }
 import ceylon.language.meta.declaration {
     ValueDeclaration,
     OpenType,
-    OpenClassOrInterfaceType
+    OpenClassOrInterfaceType,
+    ClassOrInterfaceDeclaration
 }
 import ceylon.language.meta.model {
     Class
@@ -22,100 +28,61 @@ shared final annotation
 class EnvironmentAnnotation(shared String envName) satisfies
         OptionalAnnotation<EnvironmentAnnotation, ValueDeclaration> {}
 
-"annotation to mark functions that require
+"annotation to mark attributes(fields) that require
  environment variables for their proper work"
 shared annotation EnvironmentAnnotation environment(String envName)
         => EnvironmentAnnotation(envName);
 
-"annotation to mark fields that optionally may be configured
- from environment"
-shared final annotation
-class OptionalEnvironmentAnnotation(shared String envName) satisfies
-        OptionalAnnotation<OptionalEnvironmentAnnotation, ValueDeclaration> {}
 
 
-"annotation to mark functions that require
- environment variables for their proper work"
-shared annotation OptionalEnvironmentAnnotation optionalEnvironment(String envName)
-        => OptionalEnvironmentAnnotation(envName);
+MutableMap<ClassOrInterfaceDeclaration, Anything(Environment, String)>
+typeParsers
+        = HashMap<ClassOrInterfaceDeclaration, Anything(Environment, String)> {
+    `class Integer` -> ((Environment e, String s) => e.getIntegerOrNull(s)),
+    `class Float` -> ((Environment e, String s) => e.getFloatOrNull(s)),
+    `class Boolean` -> ((Environment e, String s) => e.getBooleanOrNull(s)),
+    `interface Date` -> ((Environment e, String s) => e.getDateOrNull(s)),
+    `interface Time` -> ((Environment e, String s) => e.getTimeOrNull(s)),
+    `interface DateTime` -> ((Environment e, String s) => e.getDateTimeOrNull(s)),
+    `class String` -> ((Environment e, String s) => e.getStringOrNull(s))
+};
 
-
-shared T configure<T>(Environment environment = env) {
+shared T configure<out T>(Environment environment = env) {
     value type = `T`;
     "Type to configurate should be a class"
     assert(is Class<T> type);
 
-    value strictFields = [
-        for (attr in type.declaration.memberDeclarations<ValueDeclaration>())
-            if(exists env = annotations(`EnvironmentAnnotation`, attr))
-            env.envName -> attr
+    <String->ValueDeclaration>[]
+    envVarNameToFieldDeclaration = [
+        for (declaration in type.declaration.memberDeclarations<ValueDeclaration>())
+            if(exists annotation = annotations(`EnvironmentAnnotation`, declaration))
+                annotation.envName -> declaration
     ];
 
-    value optionalFields = [
-        for (attr in type.declaration.memberDeclarations<ValueDeclaration>())
-            if(exists env = annotations(`OptionalEnvironmentAnnotation`, attr))
-            env.envName -> attr
-    ];
+    value [strictFields, optionalFields]
+            = partition(envVarNameToFieldDeclaration, forItem(ValueDeclaration.defaulted));
 
-    function parsePamam(String envName, ValueDeclaration attrDecl) {
-        OpenType openType = attrDecl.openType;
+    function fillParam(<String->ValueDeclaration> envVarNameToFieldDecl) {
+        
+        value varName -> fieldDecl = envVarNameToFieldDecl;
+        OpenType openType = fieldDecl.openType;
         assert(is OpenClassOrInterfaceType openType);
-
-        if(`class Integer` == openType.declaration){
-            return attrDecl.name -> [envName, environment.getIntegerOrNull(envName)];
+        for (decl->parse in typeParsers) {
+            if(decl == openType.declaration){
+                return fieldDecl.name -> [varName, parse(environment, varName)];
+            }
         }
-        if(`class Float` == openType.declaration){
-            return attrDecl.name -> [envName, environment.getFloatOrNull(envName)];
-        }
-        if(`class Boolean` == openType.declaration){
-            return attrDecl.name -> [envName, environment.getBooleanOrNull(envName)];
-        }
-        if(`interface Date` == openType.declaration){
-            return attrDecl.name -> [envName, environment.getDateOrNull(envName)];
-        }
-        if(`interface Time` == openType.declaration){
-            return attrDecl.name -> [envName, environment.getTimeOrNull(envName)];
-        }
-        if(`interface DateTime` == openType.declaration){
-            return attrDecl.name -> [envName, environment.getDateTimeOrNull(envName)];
-        }
-        if(`class String` == openType.declaration){
-            return attrDecl.name -> [envName, environment.getStringOrNull(envName)];
-        }
-//        if(`class Integer?` == openType.declaration){
-//            return   attrDecl.name -> [envName, env.getIntegerOrNull(envName)];
-//        }
-//        if(`class Float?` == openType.declaration){
-//            return   attrDecl.name -> [envName, env.getFloatOrNull(envName)];
-//        }
-//        if(`class Boolean?` == openType.declaration){
-//            return   attrDecl.name -> [envName, env.getBooleanOrNull(envName)];
-//        }
-//        if(`interface Date?` == openType.declaration){
-//            return   attrDecl.name -> [envName, env.getDateOrNull(envName)];
-//        }
-//        if(`interface Time?` == openType.declaration){
-//            return   attrDecl.name -> [envName, env.getTimeOrNull(envName)];
-//        }
-//        if(`interface DateTime?` == openType.declaration){
-//            return   attrDecl.name -> [envName, env.getDateTimeOrNull(envName)];
-//        }
-//        if(`class String?` == openType.declaration){
-//            return   attrDecl.name -> [envName, env.getStringOrNull(envName)];
-//        }
         print("OPEN_TYPE: ``openType``");
-        return attrDecl.name -> [envName, null];
+        return fieldDecl.name -> [varName, null];
     }
 
-    value params  = [for (envName -> attr in strictFields)
-                        parsePamam(envName, attr)];
+    value params = strictFields.collect(fillParam);
 
-    if(nonempty undefinedParams = params.select((p)=> ! p.item[1] exists)){
-        throw AssertionError("[``", ".join(undefinedParams.map((k->v)=> v[0]))``] - variable(s) should be specified in environment");
+    if(nonempty unspecified = [for (_->[name, val] in params) if(is Null val) name]) {
+        throw AssertionError( "[``", ".join(unspecified)``] - variable(s) should be specified in environment");
     }
 
-    value optionalParams  = [for (envName -> attr in optionalFields)
-                                parsePamam(envName, attr)];
+    value optionalParams  = optionalFields.collect(fillParam);
 
     value args = concatenate(params, optionalParams).map((k->v) => k->v[1]);
     return type.namedApply(args);
