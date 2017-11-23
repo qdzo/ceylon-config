@@ -17,17 +17,28 @@ shared JsonFileLoader defaultJsonConfigLoader = JsonFileLoader("config.json");
 
 "Loads variables from json config.
  all nested path converts to plain with `dot` separator"
-shared class JsonFileLoader(String filename) extends Loader() {
-    "filename should ends with .json extension"
-    assert(filename.endsWith(".json"));
+shared class JsonFileLoader extends Loader {
+    Loader loader;
+    shared new (String filename) extends Loader() {
+        "filename should ends with .json extension"
+        assert(filename.endsWith(".json"));
+        "file should exists ``filename``"
+        assert(is File file = parsePath(filename).resource);
+        value fileContent = "\n".join(lines(file));
+        loader = JsonLoader(fileContent);
+    }
+    shared actual Map<String,String> load => loader.load;
+}
+
+"Loads variables from json config.
+ all nested path converts to plain with `dot` separator"
+shared class JsonLoader(String jsonString) extends Loader() {
 
     shared actual Map<String,String> load {
-        if(is File file = parsePath(filename).resource) {
-            value fileContent = "\n".join(lines(file));
-            "Json file should be with correct structure"
-            assert(is JsonObject json = parseJson(fileContent));
+        if(is JsonObject json = parseJson(jsonString)) { // TODO maybe parseJson move to JsonFileLoader
             return toPlainPath(json, []);
         }
+        log.warn("Json should be with correct structure: ``jsonString``");
         return emptyMap;
     }
 
