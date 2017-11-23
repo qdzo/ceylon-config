@@ -8,7 +8,7 @@ shared void run() {
     // value hello = ";";
     // print(env.getFloat("java.class.version"));
     // checkEnvRequirements();
-    print(createType<SomeConfig>());
+    print(configure<SomeConfig>());
 }
 
 class SomeConfig(
