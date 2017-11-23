@@ -33,11 +33,11 @@ class EnvironmentAnnotation(shared String envName) satisfies
 shared annotation EnvironmentAnnotation environment(String envName)
         => EnvironmentAnnotation(envName);
 
+shared alias TypeParser => Anything(Environment, String);
 
-
-MutableMap<ClassOrInterfaceDeclaration, Anything(Environment, String)>
+MutableMap<ClassOrInterfaceDeclaration, TypeParser>
 typeParsers
-        = HashMap<ClassOrInterfaceDeclaration, Anything(Environment, String)> {
+        = HashMap<ClassOrInterfaceDeclaration, TypeParser> {
     `class Integer` -> ((Environment e, String s) => e.getIntegerOrNull(s)),
     `class Float` -> ((Environment e, String s) => e.getFloatOrNull(s)),
     `class Boolean` -> ((Environment e, String s) => e.getBooleanOrNull(s)),
@@ -46,6 +46,15 @@ typeParsers
     `interface DateTime` -> ((Environment e, String s) => e.getDateTimeOrNull(s)),
     `class String` -> ((Environment e, String s) => e.getStringOrNull(s))
 };
+
+
+shared void registerTypeParser(ClassOrInterfaceDeclaration decl, TypeParser typeParser) {
+    typeParsers.put(decl, typeParser);
+}
+
+shared void unregisterTypeParser(ClassOrInterfaceDeclaration decl) {
+    typeParsers.remove(decl);
+}
 
 shared T configure<out T>(Environment environment = env) {
     value type = `T`;
@@ -88,11 +97,3 @@ shared T configure<out T>(Environment environment = env) {
     return type.namedApply(args);
 }
 
-//        case(is Type<Integer?>) attrDecl.name -> env.getIntegerOrNull(envName)
-//        case(is Type<Float?>) attrDecl.name -> env.getFloatOrNull(envName)
-//        case(is Type<Boolean?>) attrDecl.name -> env.getBoolean?(envName)
-//        case(is Type<Date?>) attrDecl.name -> env.getDateOrNull(envName)
-//        case(is Type<Time?>) attrDecl.name -> env.getTimeOrNull(envName)
-//        case(is Type<DateTime?>) attrDecl.name -> env.getDateTimeOrNull(envName)
-//        case(is Type<String?>) attrDecl.name -> env.getStringOrNull(envName)
-// ----------------------------------------------------------------
