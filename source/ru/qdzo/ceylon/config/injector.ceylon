@@ -40,7 +40,7 @@ shared annotation OptionalEnvironmentAnnotation optionalEnvironment(String envNa
         => OptionalEnvironmentAnnotation(envName);
 
 
-shared T createType<T>() {
+shared T configure<T>(Environment environment = env) {
     value type = `T`;
     "Type to configurate should be a class"
     assert(is Class<T> type);
@@ -62,25 +62,25 @@ shared T createType<T>() {
         assert(is OpenClassOrInterfaceType openType);
 
         if(`class Integer` == openType.declaration){
-            return attrDecl.name -> [envName, env.getIntegerOrNull(envName)];
+            return attrDecl.name -> [envName, environment.getIntegerOrNull(envName)];
         }
         if(`class Float` == openType.declaration){
-            return attrDecl.name -> [envName, env.getFloatOrNull(envName)];
+            return attrDecl.name -> [envName, environment.getFloatOrNull(envName)];
         }
         if(`class Boolean` == openType.declaration){
-            return attrDecl.name -> [envName, env.getBooleanOrNull(envName)];
+            return attrDecl.name -> [envName, environment.getBooleanOrNull(envName)];
         }
         if(`interface Date` == openType.declaration){
-            return attrDecl.name -> [envName, env.getDateOrNull(envName)];
+            return attrDecl.name -> [envName, environment.getDateOrNull(envName)];
         }
         if(`interface Time` == openType.declaration){
-            return attrDecl.name -> [envName, env.getTimeOrNull(envName)];
+            return attrDecl.name -> [envName, environment.getTimeOrNull(envName)];
         }
         if(`interface DateTime` == openType.declaration){
-            return attrDecl.name -> [envName, env.getDateTimeOrNull(envName)];
+            return attrDecl.name -> [envName, environment.getDateTimeOrNull(envName)];
         }
         if(`class String` == openType.declaration){
-            return attrDecl.name -> [envName, env.getStringOrNull(envName)];
+            return attrDecl.name -> [envName, environment.getStringOrNull(envName)];
         }
 //        if(`class Integer?` == openType.declaration){
 //            return   attrDecl.name -> [envName, env.getIntegerOrNull(envName)];
