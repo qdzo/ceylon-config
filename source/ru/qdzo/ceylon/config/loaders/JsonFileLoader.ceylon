@@ -7,7 +7,8 @@ import ru.qdzo.ceylon.config {
     Loader,
     readFile,
     flattenMap,
-    sanitizeVar
+    sanitizeVar,
+    emptyLoader
 }
 
 "Loads config.json stored in same dir where application starts"
@@ -15,16 +16,8 @@ shared JsonFileLoader defaultJsonConfigLoader = JsonFileLoader("config.json");
 
 "Loads variables from json config.
  all nested path converts to plain with `dot` separator"
-shared class JsonFileLoader extends Loader {
-    Loader loader;
-    shared new (String filename) extends Loader() {
-        "filename should ends with .json extension"
-        assert(filename.endsWith(".json"));
-        assert(exists fileContent = readFile(filename));
-        loader = JsonLoader(fileContent);
-    }
-    shared actual Map<String,String> load => loader.load;
-}
+shared class JsonFileLoader(String filename)
+        extends FileLoader(filename, JsonLoader) {}
 
 "Loads variables from json config.
  all nested path converts to plain with `dot` separator"
