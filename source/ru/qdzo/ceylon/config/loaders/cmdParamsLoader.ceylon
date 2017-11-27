@@ -25,10 +25,10 @@ shared object cmdParamsLoader extends Loader() {
     */
     {<String->String>*} geatherSeparateNamedArgs({<Integer->String>*} args)
           => { for(i->arg in args)
-                  if(arg.startsWith("-"),
-                    exists _->val = args.find(forKey((i+1).equals)),
-                     !val.startsWith("-"))
-                        sanitizeVar(arg.trimLeading('-'.equals) -> val) };
+                   if(arg.startsWith("-"),
+                      exists _->val = args.find(forKey((i+1).equals)),
+                      !val.startsWith("-"))
+                       sanitizeVar(arg.trimLeading('-'.equals) -> val) };
 
     /*
       split cmd-params into 2 categories:

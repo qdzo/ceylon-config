@@ -14,6 +14,6 @@ import ru.qdzo.ceylon.config {
 "Loads variables from system environment variables"
 shared object systemEnvLoader extends Loader() {
     load => let(jEnvVars = CeylonIterable(System.getenv().entrySet()))
-    map { for(entry in jEnvVars)
-             sanitizeVar(entry.key.string -> entry.\ivalue) };
+                map { for(entry in jEnvVars)
+                          sanitizeVar(entry.key.string -> entry.\ivalue) };
 }
