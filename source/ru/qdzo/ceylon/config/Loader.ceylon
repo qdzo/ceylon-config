@@ -12,6 +12,12 @@ shared abstract class Loader() {
     hash => load.hash;
 }
 
+"Used as stab loader"
+shared object emptyLoader extends Loader() {
+    shared actual Map<String,String> load => emptyMap;
+}
+
+
 "Sanitize var entry"
 shared <String->String>
 sanitizeVar(<String->Anything> entry)
