@@ -1,7 +1,12 @@
 import ceylon.time {
     Date,
     Time,
-    DateTime
+    DateTime,
+    now
+}
+
+import ru.qdzo.ceylon.config.loaders {
+    MapLoader
 }
 
 "Run the module `ru.qdzo.ceylon.config`."
@@ -13,7 +18,22 @@ shared void run() {
     // value hello = ";";
     // print(env.getFloat("java.class.version"));
     // checkEnvRequirements();
-    print(configure<SomeConfig>());
+    value e = Environment({
+        MapLoader {
+            "db"-> map {
+                "host" -> "net",
+                "port" -> 8080
+            },
+            "start" -> map {
+                "date"-> now().date(),
+                "time"-> now().time(),
+                "dateTime" -> now().dateTime(),
+                "price" -> 7.0,
+                "coins" -> {1, 3 ,4 ,5 ,6}
+            }
+        }
+    });
+    print(configure<SomeConfig>(e));
 }
 
 class SomeConfig(
@@ -29,11 +49,22 @@ class SomeConfig(
         environment("start.time")
         shared Time startTime,
 
-        environment("start.dateTime")
+        environment("start.datetime")
         shared DateTime startDateTime,
 
         environment("start.price")
-        shared Float startPrice
+        shared Float startPrice,
+
+        environment("start.coins")
+        shared [Integer*] coins
         ) {
-    string => "SomeConfig[host=``host``, port=``port``]";
+    string => "SomeConfig[ "+
+            " host=``host``"+
+            " port=``port``"+
+            " startDate=``startDate``"+
+            " startTime=``startTime``"+
+            " startDateTime=``startDateTime``"+
+            " startPrice=``startPrice``"+
+            " coins=``coins``"+
+    " ]";
 }
