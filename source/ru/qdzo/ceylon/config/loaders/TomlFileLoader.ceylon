@@ -9,9 +9,6 @@ import ru.qdzo.ceylon.config {
     sanitizeVar
 }
 
-"Loads config.toml stored in same dir where application starts"
-shared TomlFileLoader defaultTomlConfigLoader = TomlFileLoader("config.toml");
-
 "Loads variables from toml config.
  all nested path converts to plain with `dot` separator"
 shared class TomlFileLoader(String filename)
