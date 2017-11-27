@@ -1,9 +1,10 @@
 import ru.qdzo.ceylon.config {
     Loader,
-    sanitizeVar
+    sanitizeVar,
+    flattenMap
 }
 
 "Ad-hoc loader from plain string to string entries"
-shared class MapLoader({<String->String>*} envs) extends Loader() {
-    load => map(envs.map(sanitizeVar));
+shared class MapLoader({<String->Anything>*} envs) extends Loader() {
+    load => map(flattenMap(map(envs), []).map(sanitizeVar));
 }
