@@ -1,10 +1,10 @@
 import ru.qdzo.ceylon.config.loaders {
     cmdParamsLoader,
     systemPropsLoader,
-    defaultJsonConfigLoader,
-    defaultTomlConfigLoader,
-    CustomConfigLoader,
-    systemEnvLoader
+    CustomConfigFileLoader,
+    systemEnvLoader,
+    JsonFileLoader,
+    TomlFileLoader
 }
 /*
     loads config.json
@@ -19,14 +19,13 @@ import ru.qdzo.ceylon.config.loaders {
 "Creates environment singleton on first usage"
 shared late Environment env = Environment(loaders);
 
-
 variable Set<Loader> _loaders = set {
     defaultJsonConfigLoader,
     defaultTomlConfigLoader,
-    CustomConfigLoader(profileJsonConfig else ""),
-    CustomConfigLoader(profileTomlConfig else ""),
+    profileJsonConfigLoader,
+    profileTomlConfigLoader,
     systemEnvLoader,
-    CustomConfigLoader(process.namedArgumentValue("config") else ""),
+    customConfigFileLoader,
     cmdParamsLoader,
     systemPropsLoader
 };
@@ -43,15 +42,37 @@ shared void unregisterLoader(Loader loader) {
 
 shared Set<Loader> loaders = _loaders;
 
-String? profileJsonConfig =>
-        let(profile = process.environmentVariableValue("PROFILE"))
-        if (exists profile)
-        then "config/``profile``/config.json"
+"Loads config.json stored in same dir where application starts"
+shared Loader defaultJsonConfigLoader = JsonFileLoader("config.json");
+
+"Loads config.toml stored in same dir where application starts"
+shared Loader defaultTomlConfigLoader = TomlFileLoader("config.toml");
+
+"Loads `/config/${PROFILE}/config.json` file"
+shared Loader profileJsonConfigLoader =
+        JsonFileLoader(profileJsonConfigFileName else "");
+
+"Loads `/config/${PROFILE}/config.toml` file"
+shared Loader profileTomlConfigLoader =
+        TomlFileLoader(profileTomlConfigFileName else "");
+
+"Loads config file specified by `--config` cmd parameter"
+shared Loader customConfigFileLoader =
+        CustomConfigFileLoader(customConfigFileName else "");
+
+String? customConfigFileName = process.namedArgumentValue("config");
+
+String? profileDir =>
+        if (exists profile = process.environmentVariableValue("PROFILE"))
+        then "config/``profile``"
         else null;
 
-String? profileTomlConfig =>
-        let(profile = process.environmentVariableValue("PROFILE"))
-        if (exists profile)
-        then "config/``profile``/config.toml"
+String? profileJsonConfigFileName =>
+        if (exists dir = profileDir)
+        then "``dir``/config.json"
         else null;
 
+String? profileTomlConfigFileName =>
+        if (exists dir = profileDir)
+        then "``dir``/config.toml"
+        else null;
