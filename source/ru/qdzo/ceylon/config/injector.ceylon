@@ -35,6 +35,28 @@ shared annotation EnvironmentAnnotation environment(String envName)
 
 shared alias TypeParser => Anything(Environment, String);
 
+[T*]
+iterableParser<T>(T(String) typeParser)(Environment e, String s) {
+    print("ITERABLE parser enter");
+    if(exists str = e.getStringOrNull(s), str.contains(",")) {
+        {String*} items;
+        if((str.startsWith("[") && str.endsWith("]")) ||
+           (str.startsWith("{") && str.endsWith("}"))){
+            items = str[1..(str.size - 2)].split(','.equals)
+                    .collect((e)=> e.trim(' '.equals));
+        } else {
+            items = str.split(','.equals)
+                    .collect((e)=> e.trim(' '.equals));
+        }
+        print(items);
+        print("ITERABLE parser str: ``items``");
+        value res = [*items.collect(typeParser).coalesced];
+//        print(res);
+        return res;
+    }
+    return [];
+}
+
 MutableMap<ClassOrInterfaceDeclaration, TypeParser>
 typeParsers
         = HashMap<ClassOrInterfaceDeclaration, TypeParser> {
@@ -44,9 +66,14 @@ typeParsers
     `interface Date` -> ((Environment e, String s) => e.getDateOrNull(s)),
     `interface Time` -> ((Environment e, String s) => e.getTimeOrNull(s)),
     `interface DateTime` -> ((Environment e, String s) => e.getDateTimeOrNull(s)),
-    `class String` -> ((Environment e, String s) => e.getStringOrNull(s))
+    `class String` -> ((Environment e, String s) => e.getStringOrNull(s)),
+    `interface Sequential` -> iterableParser(parseInteger) // TODO test part
 };
 
+Integer? parseInteger(String str) =>
+        if(is Integer int = Integer.parse(str))
+        then int
+        else null;
 
 shared void registerTypeParser(ClassOrInterfaceDeclaration decl, TypeParser typeParser) {
     typeParsers.put(decl, typeParser);
@@ -94,6 +121,7 @@ shared T configure<out T>(Environment environment = env) {
     value optionalParams  = optionalFields.collect(fillParam);
 
     value args = concatenate(params, optionalParams).map((k->v) => k->v[1]);
+    log.info("args: ``args.string``");
     return type.namedApply(args);
 }
 
