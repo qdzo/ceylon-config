@@ -5,7 +5,6 @@ import ceylon.toml {
 
 import ru.qdzo.ceylon.config {
     Loader,
-    readFile,
     flattenMap,
     sanitizeVar
 }
@@ -15,16 +14,8 @@ shared TomlFileLoader defaultTomlConfigLoader = TomlFileLoader("config.toml");
 
 "Loads variables from toml config.
  all nested path converts to plain with `dot` separator"
-shared class TomlFileLoader extends Loader {
-    Loader loader;
-    shared new (String filename) extends Loader() {
-        "filename should ends with .toml extension"
-        assert(filename.endsWith(".toml"));
-        assert(exists fileContent = readFile(filename));
-        loader = TomlLoader(fileContent);
-    }
-    shared actual Map<String,String> load => loader.load;
-}
+shared class TomlFileLoader(String filename)
+        extends FileLoader(filename, TomlLoader) {}
 
 "Loads variables from toml config.
  all nested path converts to plain with `dot` separator"
