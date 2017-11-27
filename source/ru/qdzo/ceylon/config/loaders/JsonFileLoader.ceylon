@@ -5,10 +5,8 @@ import ceylon.json {
 
 import ru.qdzo.ceylon.config {
     Loader,
-    readFile,
     flattenMap,
-    sanitizeVar,
-    emptyLoader
+    sanitizeVar
 }
 
 "Loads config.json stored in same dir where application starts"
