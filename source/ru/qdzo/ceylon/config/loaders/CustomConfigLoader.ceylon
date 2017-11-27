@@ -1,7 +1,11 @@
 import ru.qdzo.ceylon.config {
     Loader
 }
-shared class CustomConfigLoader(String filename) extends Loader() {
+
+"Custom file loader that loads needed config file.
+ Can load json or toml files.
+ *NOTE* need correct file extension."
+shared class CustomConfigFileLoader(String filename) extends Loader() {
     shared actual Map<String,String> load =>
             if(filename.endsWith(".json")) then
                 JsonFileLoader(filename).load
