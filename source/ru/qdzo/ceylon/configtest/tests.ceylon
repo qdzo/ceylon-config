@@ -4,7 +4,7 @@ import ceylon.test {
     assertThatException
 }
 import ru.qdzo.ceylon.config {
-    sanitize,
+    sanitizeKey,
     Loader,
     Environment
 }
@@ -27,7 +27,7 @@ shared void sanitizeShouldWork() {
         "ceylon-Home",
         "Ceylon_HoMe"
     ];
-    for(sanitized in keys.map(sanitize)){
+    for(sanitized in keys.map(sanitizeKey)){
         assertEquals(sanitized, "ceylon.home");
     }
 }
