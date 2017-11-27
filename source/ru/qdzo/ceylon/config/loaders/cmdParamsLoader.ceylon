@@ -1,6 +1,6 @@
 import ru.qdzo.ceylon.config {
     Loader,
-    sanitize
+    sanitizeVar
 }
 
 "Loads variables from command parameters"
@@ -12,8 +12,7 @@ shared object cmdParamsLoader extends Loader() {
           .split('='.equals)
           .paired.first;
     if(exists nameVal) {
-        value key = sanitize(nameVal[0]);
-        return key -> nameVal[1];
+        return sanitizeVar(Entry(*nameVal));
     }
     return null;
   }
@@ -29,7 +28,7 @@ shared object cmdParamsLoader extends Loader() {
                   if(arg.startsWith("-"),
                     exists _->val = args.find(forKey((i+1).equals)),
                      !val.startsWith("-"))
-                        sanitize(arg.trimLeading('-'.equals)) -> val };
+                        sanitizeVar(arg.trimLeading('-'.equals) -> val) };
 
     /*
       split cmd-params into 2 categories:

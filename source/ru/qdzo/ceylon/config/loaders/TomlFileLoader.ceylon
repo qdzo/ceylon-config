@@ -1,8 +1,3 @@
-import ceylon.file {
-    parsePath,
-    lines,
-    File
-}
 import ceylon.toml {
     TomlTable,
     parseToml
@@ -10,7 +5,9 @@ import ceylon.toml {
 
 import ru.qdzo.ceylon.config {
     Loader,
-    sanitize
+    readFile,
+    flattenMap,
+    sanitizeVar
 }
 
 "Loads config.toml stored in same dir where application starts"
@@ -23,11 +20,9 @@ shared class TomlFileLoader extends Loader {
     shared new (String filename) extends Loader() {
         "filename should ends with .toml extension"
         assert(filename.endsWith(".toml"));
-        assert(is File file = parsePath(filename).resource);
-        value fileContent = "\n".join(lines(file));
+        assert(exists fileContent = readFile(filename));
         loader = TomlLoader(fileContent);
     }
-
     shared actual Map<String,String> load => loader.load;
 }
 
@@ -37,23 +32,9 @@ shared class TomlLoader(String tomlAsString) extends Loader() {
 
     shared actual Map<String,String> load {
         if(is TomlTable toml = parseToml(tomlAsString)) { // TODO maybe parseToml move to TomlFileLoader
-            return toPlainPath(toml, []);
+            return map(flattenMap(toml, []).map(sanitizeVar));
         }
         log.warn("TomlLoader: not load: Toml should be with correct structure\n``tomlAsString``");
         return emptyMap;
     }
-
-    "convert nested objects to plain path with `.`(dot) separator
-     *NOTE:* Array will be converted to string"
-    Map<String,String> toPlainPath(TomlTable toml, [String*] path) => map (
-        toml.flatMap((key -> item) {
-            switch(item)
-            case (is TomlTable) {
-                return toPlainPath(item, path.append([key]));
-            }
-            else {
-                value pathKey = ".".join(path.append([key]));
-                return { sanitize(pathKey) -> item.string };
-            }
-        }));
 }

@@ -30,10 +30,10 @@ test
 shared void jsonLoaderShouldLoadVars() {
      value loader = JsonFileLoader("./resource/ru/qdzo/ceylon/configtest/config.json");
      value vars = loader.load;
-     assertEquals("JsonLoader",              vars["name"]);
-     assertEquals("1.0.0",                   vars["version"]);
-     assertEquals("01.11.17",                vars["info.day"]);
-     assertEquals("00.17",                   vars["info.time"]);
+     assertEquals("JsonLoader",            vars["name"]);
+     assertEquals("1.0.0",                 vars["version"]);
+     assertEquals("01.11.17",              vars["info.day"]);
+     assertEquals("00.17",                 vars["info.time"]);
      assertEquals("[\"one\",{\"one\":1}]", vars["info.other"]);
 }
 

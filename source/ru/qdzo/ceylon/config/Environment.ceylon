@@ -28,7 +28,7 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
 
     defines(Object key) => get(key) exists;
 
-    get(Object key) => envVars[key.string];
+    get(Object key) => envVars[key];
 
     "Get `String` value for given key.
      throws error if value not present or it can not be parsed"

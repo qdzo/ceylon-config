@@ -1,19 +1,19 @@
 import ceylon.interop.java {
     CeylonIterable
 }
-import ru.qdzo.ceylon.config {
-    Loader,
-    sanitize
-}
-import ceylon.collection {
-    HashMap
-}
+
 import java.lang {
     System
+}
+
+import ru.qdzo.ceylon.config {
+    Loader,
+    sanitizeVar
 }
 
 "Loads variables from system environment variables"
 shared object systemEnvLoader extends Loader() {
     load => let(jEnvVars = CeylonIterable(System.getenv().entrySet()))
-    HashMap { for(entry in jEnvVars) sanitize(entry.key.string) -> entry.\ivalue.string };
+    map { for(entry in jEnvVars)
+             sanitizeVar(entry.key.string -> entry.\ivalue) };
 }
