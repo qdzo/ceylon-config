@@ -29,7 +29,9 @@ shared void run() {
                 "time"-> now().time(),
                 "dateTime" -> now().dateTime(),
                 "price" -> 7.0,
-                "coins" -> {1, 3 ,4 ,5 ,6}
+                "ports" -> {80, 3000, 22, 8080, 5000},
+                "hosts" -> {"ya.ru", "github.com", "gmail.ru"},
+                "coins"->{1.0, 2.1, 3.0, 4.7}
             }
         }
     });
@@ -55,8 +57,14 @@ class SomeConfig(
         environment("start.price")
         shared Float startPrice,
 
+        environment("start.ports")
+        shared [Integer*] ports,
+
+        environment("start.hosts")
+        shared [String*] hosts,
+
         environment("start.coins")
-        shared [Integer*] coins
+        shared [Float*] coins
         ) {
     string => "SomeConfig[ "+
             " host=``host``"+
@@ -65,6 +73,8 @@ class SomeConfig(
             " startTime=``startTime``"+
             " startDateTime=``startDateTime``"+
             " startPrice=``startPrice``"+
+            " ports=``ports``"+
+            " hosts=``hosts``"+
             " coins=``coins``"+
-    " ]";
+            " ]";
 }
