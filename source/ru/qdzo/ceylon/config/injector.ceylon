@@ -4,7 +4,8 @@ import ceylon.collection {
     MutableMap
 }
 import ceylon.language.meta {
-    annotations
+    annotations,
+    type
 }
 import ceylon.language.meta.declaration {
     ValueDeclaration,
@@ -20,7 +21,11 @@ import ceylon.time {
     Time,
     DateTime
 }
-
+import ceylon.time.iso8601 {
+    parseDate,
+    parseTime,
+    parseDateTime
+}
 
 "annotation to mark fields that will be configured
  from environment"
@@ -33,53 +38,64 @@ class EnvironmentAnnotation(shared String envName) satisfies
 shared annotation EnvironmentAnnotation environment(String envName)
         => EnvironmentAnnotation(envName);
 
-shared alias TypeParser => Anything(Environment, String);
+Boolean isWrappedWithBrackets(String str)
+        => (str.startsWith("[") && str.endsWith("]")) ||
+           (str.startsWith("{") && str.endsWith("}"));
 
-[T*]
-iterableParser<T>(T(String) typeParser)(Environment e, String s) {
-    print("ITERABLE parser enter");
-    if(exists str = e.getStringOrNull(s), str.contains(",")) {
-        {String*} items;
-        if((str.startsWith("[") && str.endsWith("]")) ||
-           (str.startsWith("{") && str.endsWith("}"))){
-            items = str[1..(str.size - 2)].split(','.equals)
-                    .collect((e)=> e.trim(' '.equals));
+"Splits string by comma and trims results"
+String[] splitByComma(String str)
+        => str.split(','.equals)*.trim(' '.equals);
+
+"Removes one char from start and end of string"
+String trimFirstAndLastChars(String str)
+        => str[1..(str.size - 2)];
+
+shared alias TypeParser => Anything(String);
+
+String[] splitStringList(String str) {
+    if(str.contains(",")) {
+        if(isWrappedWithBrackets(str)){
+            return splitByComma(trimFirstAndLastChars(str));
         } else {
-            items = str.split(','.equals)
-                    .collect((e)=> e.trim(' '.equals));
+            return splitByComma(str);
         }
-        print(items);
-        print("ITERABLE parser str: ``items``");
-        value res = [*items.collect(typeParser).coalesced];
-//        print(res);
-        return res;
     }
     return [];
 }
 
+Integer? parseInteger(String str)
+        => if(is Integer i = Integer.parse(str))
+           then i else null;
+
+Float? parseFloat(String str)
+        => if(is Float f = Float.parse(str))
+           then f else null;
+
+Boolean? parseBoolean(String str)
+        => if(is Boolean b = Boolean.parse(str))
+           then b else null;
+
 MutableMap<ClassOrInterfaceDeclaration, TypeParser>
-typeParsers
-        = HashMap<ClassOrInterfaceDeclaration, TypeParser> {
-    `class Integer` -> ((Environment e, String s) => e.getIntegerOrNull(s)),
-    `class Float` -> ((Environment e, String s) => e.getFloatOrNull(s)),
-    `class Boolean` -> ((Environment e, String s) => e.getBooleanOrNull(s)),
-    `interface Date` -> ((Environment e, String s) => e.getDateOrNull(s)),
-    `interface Time` -> ((Environment e, String s) => e.getTimeOrNull(s)),
-    `interface DateTime` -> ((Environment e, String s) => e.getDateTimeOrNull(s)),
-    `class String` -> ((Environment e, String s) => e.getStringOrNull(s)),
-    `interface Sequential` -> iterableParser(parseInteger) // TODO test part
+typeParsers = HashMap<ClassOrInterfaceDeclaration, TypeParser> {
+    `class Integer` -> parseInteger,
+    `class Float` -> parseFloat,
+    `class Boolean` -> parseBoolean,
+    `class String` -> String,
+    `interface Date` -> parseDate,
+    `interface Time` -> parseTime,
+    `interface DateTime` -> parseDateTime
 };
 
-Integer? parseInteger(String str) =>
-        if(is Integer int = Integer.parse(str))
-        then int
-        else null;
-
-shared void registerTypeParser(ClassOrInterfaceDeclaration decl, TypeParser typeParser) {
+shared void
+registerTypeParser(
+        ClassOrInterfaceDeclaration decl,
+        TypeParser typeParser) {
     typeParsers.put(decl, typeParser);
 }
 
-shared void unregisterTypeParser(ClassOrInterfaceDeclaration decl) {
+shared void
+unregisterTypeParser(
+        ClassOrInterfaceDeclaration decl) {
     typeParsers.remove(decl);
 }
 
@@ -96,18 +112,37 @@ shared T configure<out T>(Environment environment = env) {
     ];
 
     value [strictFields, optionalFields]
-            = partition(envVarNameToFieldDeclaration, forItem(ValueDeclaration.defaulted));
+            = partition(envVarNameToFieldDeclaration,
+                        forItem(ValueDeclaration.defaulted));
 
     function fillParam(<String->ValueDeclaration> envVarNameToFieldDecl) {
-        
+
         value varName -> fieldDecl = envVarNameToFieldDecl;
         OpenType openType = fieldDecl.openType;
         assert(is OpenClassOrInterfaceType openType);
-        for (decl->parse in typeParsers) {
-            if(decl == openType.declaration){
-                return fieldDecl.name -> [varName, parse(environment, varName)];
+        
+        if(openType.declaration in {`interface Sequential`, `interface Iterable`},
+            is OpenClassOrInterfaceType typeParameterOpenType
+                    = openType.typeArgumentList.first){
+            for (decl->parse in typeParsers) {
+                if(decl == typeParameterOpenType.declaration,
+                    exists var = environment[varName]) {
+                    value list = splitStringList(var);
+                    value res = list.collect(parse).coalesced.sequence();
+                    print(res);
+                    return fieldDecl.name -> [varName, res];
+                }
+            }
+
+        } else {
+            for (decl->parse in typeParsers) {
+                if(decl == openType.declaration,
+                    exists var = environment[varName]){
+                    return fieldDecl.name -> [varName, parse(var)];
+                }
             }
         }
+        
         print("OPEN_TYPE: ``openType``");
         return fieldDecl.name -> [varName, null];
     }
@@ -121,6 +156,7 @@ shared T configure<out T>(Environment environment = env) {
     value optionalParams  = optionalFields.collect(fillParam);
 
     value args = concatenate(params, optionalParams).map((k->v) => k->v[1]);
+    
     log.info("args: ``args.string``");
     return type.namedApply(args);
 }
