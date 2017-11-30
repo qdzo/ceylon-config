@@ -4,8 +4,7 @@ import ceylon.collection {
     MutableMap
 }
 import ceylon.language.meta {
-    annotations,
-    type
+    annotations
 }
 import ceylon.language.meta.declaration {
     ValueDeclaration,
@@ -50,8 +49,6 @@ String[] splitByComma(String str)
 String trimFirstAndLastChars(String str)
         => str[1..(str.size - 2)];
 
-shared alias TypeParser => Anything(String);
-
 String[] splitStringList(String str) {
     if(str.contains(",")) {
         if(isWrappedWithBrackets(str)){
@@ -74,6 +71,27 @@ Float? parseFloat(String str)
 Boolean? parseBoolean(String str)
         => if(is Boolean b = Boolean.parse(str))
            then b else null;
+
+shared Anything narrowSequence(ClassOrInterfaceDeclaration openType, [Anything*] args)  {
+    if(openType == `class Integer`) {
+        return args.narrow<Integer>().sequence();
+    } else if(openType == `class Float`) {
+        return args.narrow<Float>().sequence();
+    } else if(openType == `class Boolean`) {
+        return args.narrow<Boolean>().sequence();
+    } else if(openType == `class String`) {
+        return args.narrow<String>().sequence();
+    } else if(openType == `interface Date`) {
+        return args.narrow<Date>().sequence();
+    } else if(openType == `interface Time`) {
+        return args.narrow<Time>().sequence();
+    } else if(openType == `interface DateTime`) {
+        return args.narrow<DateTime>().sequence();
+    }
+    throw Exception("Not supported type ``openType``");
+}
+
+shared alias TypeParser => Anything(String);
 
 MutableMap<ClassOrInterfaceDeclaration, TypeParser>
 typeParsers = HashMap<ClassOrInterfaceDeclaration, TypeParser> {
@@ -100,13 +118,13 @@ unregisterTypeParser(
 }
 
 shared T configure<out T>(Environment environment = env) {
-    value type = `T`;
+    value configuredType = `T`;
     "Type to configurate should be a class"
-    assert(is Class<T> type);
+    assert(is Class<T> configuredType);
 
     <String->ValueDeclaration>[]
     envVarNameToFieldDeclaration = [
-        for (declaration in type.declaration.memberDeclarations<ValueDeclaration>())
+        for (declaration in configuredType.declaration.memberDeclarations<ValueDeclaration>())
             if(exists annotation = annotations(`EnvironmentAnnotation`, declaration))
                 annotation.envName -> declaration
     ];
@@ -122,15 +140,15 @@ shared T configure<out T>(Environment environment = env) {
         assert(is OpenClassOrInterfaceType openType);
         
         if(openType.declaration in {`interface Sequential`, `interface Iterable`},
-            is OpenClassOrInterfaceType typeParameterOpenType
-                    = openType.typeArgumentList.first){
+            is OpenClassOrInterfaceType typeParameterOpenType = openType.typeArgumentList.first){
             for (decl->parse in typeParsers) {
                 if(decl == typeParameterOpenType.declaration,
                     exists var = environment[varName]) {
                     value list = splitStringList(var);
-                    value res = list.collect(parse).coalesced.sequence();
+                    value res = list.collect(parse);
+                    value sequence = narrowSequence(decl, res);
                     print(res);
-                    return fieldDecl.name -> [varName, res];
+                    return fieldDecl.name -> [varName, sequence];
                 }
             }
 
@@ -158,6 +176,6 @@ shared T configure<out T>(Environment environment = env) {
     value args = concatenate(params, optionalParams).map((k->v) => k->v[1]);
     
     log.info("args: ``args.string``");
-    return type.namedApply(args);
+    return configuredType.namedApply(args);
 }
 
