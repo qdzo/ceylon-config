@@ -73,26 +73,11 @@ Boolean? parseBoolean(String str)
         => if(is Boolean b = Boolean.parse(str))
            then b else null;
 
-shared Anything narrowSequence(ClassOrInterfaceDeclaration openType, [Anything*] args)  {
-    value xType = type(args.first);
-    assert(is {Anything*} ret = `function Iterable.narrow`.memberInvoke(args, [xType]));
-    return ret.sequence();
-    // if(openType == `class Integer`) {
-    //     return args.narrow<Integer>().sequence();
-    // } else if(openType == `class Float`) {
-    //     return args.narrow<Float>().sequence();
-    // } else if(openType == `class Boolean`) {
-    //     return args.narrow<Boolean>().sequence();
-    // } else if(openType == `class String`) {
-    //     return args.narrow<String>().sequence();
-    // } else if(openType == `interface Date`) {
-    //     return args.narrow<Date>().sequence();
-    // } else if(openType == `interface Time`) {
-    //     return args.narrow<Time>().sequence();
-    // } else if(openType == `interface DateTime`) {
-    //     return args.narrow<DateTime>().sequence();
-    // }
-    // throw Exception("Not supported type ``openType``");
+shared Anything unsafeNarrowSequence([Anything*] seq)  {
+    value firstElementType = type(seq.first);
+    assert(is {Anything*} narrowed
+            = `function Iterable.narrow`.memberInvoke(seq, [firstElementType]));
+    return narrowed.sequence();
 }
 
 shared alias TypeParser => Anything(String);
@@ -108,15 +93,13 @@ typeParsers = HashMap<ClassOrInterfaceDeclaration, TypeParser> {
     `interface DateTime` -> parseDateTime
 };
 
-shared void
-registerTypeParser(
+shared void registerTypeParser(
         ClassOrInterfaceDeclaration decl,
         TypeParser typeParser) {
     typeParsers.put(decl, typeParser);
 }
 
-shared void
-unregisterTypeParser(
+shared void unregisterTypeParser(
         ClassOrInterfaceDeclaration decl) {
     typeParsers.remove(decl);
 }
@@ -149,10 +132,8 @@ shared T configure<out T>(Environment environment = env) {
                 if(decl == typeParameterOpenType.declaration,
                     exists var = environment[varName]) {
                     value list = splitStringList(var);
-                    value res = list.collect(parse);
-                    value sequence = narrowSequence(decl, res);
-                    print(res);
-                    return fieldDecl.name -> [varName, sequence];
+                    value res = unsafeNarrowSequence(list.collect(parse));
+                    return fieldDecl.name -> [varName, res];
                 }
             }
 
@@ -165,7 +146,7 @@ shared T configure<out T>(Environment environment = env) {
             }
         }
         
-        print("OPEN_TYPE: ``openType``");
+        print("UNKNOWN OPEN_TYPE: ``openType``");
         return fieldDecl.name -> [varName, null];
     }
 
