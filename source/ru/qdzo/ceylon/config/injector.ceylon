@@ -4,7 +4,8 @@ import ceylon.collection {
     MutableMap
 }
 import ceylon.language.meta {
-    annotations
+    annotations,
+    type
 }
 import ceylon.language.meta.declaration {
     ValueDeclaration,
@@ -73,22 +74,25 @@ Boolean? parseBoolean(String str)
            then b else null;
 
 shared Anything narrowSequence(ClassOrInterfaceDeclaration openType, [Anything*] args)  {
-    if(openType == `class Integer`) {
-        return args.narrow<Integer>().sequence();
-    } else if(openType == `class Float`) {
-        return args.narrow<Float>().sequence();
-    } else if(openType == `class Boolean`) {
-        return args.narrow<Boolean>().sequence();
-    } else if(openType == `class String`) {
-        return args.narrow<String>().sequence();
-    } else if(openType == `interface Date`) {
-        return args.narrow<Date>().sequence();
-    } else if(openType == `interface Time`) {
-        return args.narrow<Time>().sequence();
-    } else if(openType == `interface DateTime`) {
-        return args.narrow<DateTime>().sequence();
-    }
-    throw Exception("Not supported type ``openType``");
+    value xType = type(args.first);
+    assert(is {Anything*} ret = `function Iterable.narrow`.memberInvoke(args, [xType]));
+    return ret.sequence();
+    // if(openType == `class Integer`) {
+    //     return args.narrow<Integer>().sequence();
+    // } else if(openType == `class Float`) {
+    //     return args.narrow<Float>().sequence();
+    // } else if(openType == `class Boolean`) {
+    //     return args.narrow<Boolean>().sequence();
+    // } else if(openType == `class String`) {
+    //     return args.narrow<String>().sequence();
+    // } else if(openType == `interface Date`) {
+    //     return args.narrow<Date>().sequence();
+    // } else if(openType == `interface Time`) {
+    //     return args.narrow<Time>().sequence();
+    // } else if(openType == `interface DateTime`) {
+    //     return args.narrow<DateTime>().sequence();
+    // }
+    // throw Exception("Not supported type ``openType``");
 }
 
 shared alias TypeParser => Anything(String);
