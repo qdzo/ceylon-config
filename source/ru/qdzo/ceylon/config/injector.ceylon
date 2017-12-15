@@ -32,7 +32,7 @@ class EnvVarAnnotation(shared String envName) satisfies
 
 "annotation to mark attributes(fields) that require
  environment variables for their proper work"
-shared annotation EnvVarAnnotation envvar(String envName)
+shared annotation EnvVarAnnotation envVar(String envName)
         => EnvVarAnnotation(envName);
 
 Boolean isWrappedWithBrackets(String str)

@@ -20,7 +20,7 @@ import ru.qdzo.ceylon.config {
     sanitizeKey,
     Loader,
     Environment,
-    envvar,
+    envVar,
     configure
 }
 import ru.qdzo.ceylon.config.loaders {
@@ -178,31 +178,31 @@ shared void shouldReturnNullOnGettingWrongVariableType() {
 
 
 class SomeConfig(
-        envvar("db.host")
+        envVar ("db.host")
         shared String host,
 
-        envvar("db.port")
+        envVar ("db.port")
         shared Integer port,
 
-        envvar("start.date")
+        envVar ("start.date")
         shared Date startDate,
 
-        envvar("start.time")
+        envVar ("start.time")
         shared Time startTime,
 
-        envvar("start.datetime")
+        envVar ("start.datetime")
         shared DateTime startDateTime,
 
-        envvar("start.rank")
+        envVar ("start.rank")
         shared Float startRank,
 
-        envvar("start.ports")
+        envVar ("start.ports")
         shared [Integer*] ports,
 
-        envvar("start.hosts")
+        envVar ("start.hosts")
         shared [String*] hosts,
 
-        envvar("floats")
+        envVar ("floats")
         shared {Float*} floats,
         shared String? desc = null
         ) {
