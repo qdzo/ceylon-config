@@ -194,7 +194,7 @@
 """
 
 native("jvm")
-module ru.qdzo.ceylon.config "0.1.1" {
+module ru.qdzo.ceylon.config "0.1.2-SNAPSHOT" {
     import java.base "8";
     import ceylon.interop.java "1.3.3";
     import ceylon.file "1.3.3";
