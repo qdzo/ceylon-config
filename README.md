@@ -132,6 +132,43 @@ This is made to exclude ugly and buggy variable-names followed by index - `foo.1
 
 ## Advanced
 
+### Using annotations to setup config-Classes and instantiate them
+
+It's convenient to use some class as configuration. 
+You may to annotate fields of that class with `envVar("varname")` annotation 
+and then get instantce of that class with specified parameters from the environment variables.
+
+Example:
+
+```ceylon
+class Config(
+    envVar("server.host")
+    shared String host,
+
+    envVar("server.port")
+    shared Integer port,
+    
+    envVar("server.user")
+    shared String user = "test-user",
+
+    envVar("server.pass")
+    shared String pass = "secret",
+) {}
+
+shared void run() {
+    value conf = configure<Config>(); 
+    value connection = connectDb(conf.host, conf.port, conf.user, conf.pass);
+    ...
+}
+```
+
+Rules to create such config class:
+
+* Fields must be *one* of the basic types (`Boolean`, `Integer`, `Float`, `String`, `Date`, `Time`, `DateTime`) or sequence/iterable of them.
+* Fields with default values are treated as `optional` fields, and may not have value in environment.
+* If some variable is not exists in the environment then `AssertionError` will be thrown while `configure<Type>`.
+
+
 ### Using env in non-`run` method
 
 If you want to use `env` variables somewhere in the project and you want to be sure that variable present at application startup,
@@ -145,7 +182,6 @@ shared startServer() {
     value server = newServer({});
     server.start(SocketAddress(host, port));
 }
-
 
 shared void run() {
     checkEnvRequirements(`module`); // search for `requredEnv` annotaion in current-module and check env existence
@@ -169,13 +205,6 @@ shared object mySecretLoader extends Loader() {
 
 You need to apply `sanitize` function for key, to bring it to common format (see above).
 
-Registering loader
-
-```
-registerLoader(mySecretLoader);
-```
-
-*NOTE*: custom loaders have lowest priority.
 
 ## Licence
 
