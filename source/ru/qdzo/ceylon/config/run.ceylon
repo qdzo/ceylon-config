@@ -39,32 +39,33 @@ shared void run() {
 }
 
 class SomeConfig(
-        environment("db.host")
+        envvar("db.host")
         shared String host,
 
-        environment("db.port")
+        envvar("db.port")
         shared Integer port,
 
-        environment("start.date")
+        envvar("start.date")
         shared Date startDate,
 
-        environment("start.time")
+        envvar("start.time")
         shared Time startTime,
 
-        environment("start.datetime")
+        envvar("start.datetime")
         shared DateTime startDateTime,
 
-        environment("start.price")
+        envvar("start.price")
         shared Float startPrice,
 
-        environment("start.ports")
+        envvar("start.ports")
         shared [Integer*] ports,
 
-        environment("start.hosts")
+        envvar("start.hosts")
         shared [String*] hosts,
 
-        environment("start.coins")
-        shared [Float*] coins
+        envvar("start.coins")
+        shared {Float*} coins,
+        shared String? desc = null
         ) {
     string => "SomeConfig[ "+
             " host=``host``"+

@@ -30,13 +30,13 @@ import ceylon.time.iso8601 {
 "annotation to mark fields that will be configured
  from environment"
 shared final annotation
-class EnvironmentAnnotation(shared String envName) satisfies
-        OptionalAnnotation<EnvironmentAnnotation, ValueDeclaration> {}
+class EnvVarAnnotation(shared String envName) satisfies
+        OptionalAnnotation<EnvVarAnnotation, ValueDeclaration> {}
 
 "annotation to mark attributes(fields) that require
  environment variables for their proper work"
-shared annotation EnvironmentAnnotation environment(String envName)
-        => EnvironmentAnnotation(envName);
+shared annotation EnvVarAnnotation envvar(String envName)
+        => EnvVarAnnotation(envName);
 
 Boolean isWrappedWithBrackets(String str)
         => (str.startsWith("[") && str.endsWith("]")) ||
@@ -93,17 +93,6 @@ typeParsers = HashMap<ClassOrInterfaceDeclaration, TypeParser> {
     `interface DateTime` -> parseDateTime
 };
 
-shared void registerTypeParser(
-        ClassOrInterfaceDeclaration decl,
-        TypeParser typeParser) {
-    typeParsers.put(decl, typeParser);
-}
-
-shared void unregisterTypeParser(
-        ClassOrInterfaceDeclaration decl) {
-    typeParsers.remove(decl);
-}
-
 shared T configure<out T>(Environment environment = env) {
     value configuredType = `T`;
     "Type to configurate should be a class"
@@ -112,7 +101,7 @@ shared T configure<out T>(Environment environment = env) {
     <String->ValueDeclaration>[]
     envVarNameToFieldDeclaration = [
         for (declaration in configuredType.declaration.memberDeclarations<ValueDeclaration>())
-            if(exists annotation = annotations(`EnvironmentAnnotation`, declaration))
+            if(exists annotation = annotations(`EnvVarAnnotation`, declaration))
                 annotation.envName -> declaration
     ];
 
@@ -146,7 +135,7 @@ shared T configure<out T>(Environment environment = env) {
             }
         }
         
-        print("UNKNOWN OPEN_TYPE: ``openType``");
+        log.error("UNKNOWN OPEN_TYPE: ``openType``");
         return fieldDecl.name -> [varName, null];
     }
 
