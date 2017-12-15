@@ -154,27 +154,43 @@
    }
    ```
 
-   ### Custom loaders
 
-   You can create custom config loader by extending `Loader` class and registering it in the system.
+   ### Using annotations to setup config-Classes and instantiate them
 
-   Implementing loader
+   It's convenient to use some class as configuration.
+   You may to annotate fields of that class with `envVar("varname")` annotation
+   and then get instantce of that class with specified parameters from the environment variables.
+
+   Example:
 
    ```ceylon
-   shared object mySecretLoader extends Loader() {
-       load => HashMap { sanitize("PASSWORD")->"SeCrEt" };
+   class Config(
+       envVar("server.host")
+       shared String host,
+
+       envVar("server.port")
+       shared Integer port,
+
+       envVar("server.user")
+       shared String user = "test-user",
+
+       envVar("server.pass")
+       shared String pass = "secret",
+   ) {}
+
+   shared void run() {
+       value conf = configure<Config>();
+       value connection = connectDb(conf.host, conf.port, conf.user, conf.pass);
+       ...
    }
    ```
 
-   You need to apply `sanitize` function for key, to bring it to common format (see above).
+   Rules to create such config class:
 
-   Registering loader
+   * Fields must be *one* of the basic types (`Boolean`, `Integer`, `Float`, `String`, `Date`, `Time`, `DateTime`) or sequence/iterable of them.
+   * Fields with default values are treated as `optional` fields, and may not have value in environment.
+   * If some variable is not exists in the environment then `AssertionError` will be thrown while `configure<Type>`.
 
-   ```
-   registerLoader(mySecretLoader);
-   ```
-
-   *NOTE*: custom loaders have lowest priority.
 """
 
 native("jvm")
