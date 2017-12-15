@@ -19,7 +19,7 @@ import ru.qdzo.ceylon.config.loaders {
 "Creates environment singleton on first usage"
 shared late Environment env = Environment(loaders);
 
-variable Set<Loader> _loaders = set {
+Set<Loader> _loaders = set {
     defaultJsonConfigLoader,
     defaultTomlConfigLoader,
     profileJsonConfigLoader,
@@ -29,16 +29,6 @@ variable Set<Loader> _loaders = set {
     cmdParamsLoader,
     systemPropsLoader
 };
-
-"registers loader  with lowest priority"
-shared void registerLoader(Loader loader) {
-    _loaders = set(_loaders.follow(loader));
-}
-
-"registers loader  with lowest priority"
-shared void unregisterLoader(Loader loader) {
-    _loaders = set(_loaders.filter(not(loader.equals)));
-}
 
 shared Set<Loader> loaders = _loaders;
 
