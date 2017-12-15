@@ -1,11 +1,8 @@
 import ceylon.collection {
-    partition,
-    HashMap,
-    MutableMap
+    partition
 }
 import ceylon.language.meta {
-    annotations,
-    type
+    annotations
 }
 import ceylon.language.meta.declaration {
     ValueDeclaration,
@@ -73,17 +70,7 @@ Boolean? parseBoolean(String str)
         => if(is Boolean b = Boolean.parse(str))
            then b else null;
 
-shared Anything unsafeNarrowSequence([Anything*] seq)  {
-    value firstElementType = type(seq.first);
-    assert(is {Anything*} narrowed
-            = `function Iterable.narrow`.memberInvoke(seq, [firstElementType]));
-    return narrowed.sequence();
-}
-
-shared alias TypeParser => Anything(String);
-
-MutableMap<ClassOrInterfaceDeclaration, TypeParser>
-typeParsers = HashMap<ClassOrInterfaceDeclaration, TypeParser> {
+Map<ClassOrInterfaceDeclaration, Anything(String)> typeParsers = map {
     `class Integer` -> parseInteger,
     `class Float` -> parseFloat,
     `class Boolean` -> parseBoolean,
@@ -121,7 +108,8 @@ shared T configure<out T>(Environment environment = env) {
                 if(decl == typeParameterOpenType.declaration,
                     exists var = environment[varName]) {
                     value list = splitStringList(var);
-                    value res = unsafeNarrowSequence(list.collect(parse));
+                    // tuple() is hack function - it narrows collection type-argument without meta-model.
+                    value res = list.collect(parse).tuple();
                     return fieldDecl.name -> [varName, res];
                 }
             }
