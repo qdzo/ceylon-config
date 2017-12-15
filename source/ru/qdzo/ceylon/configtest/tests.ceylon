@@ -1,22 +1,30 @@
+import ceylon.language {
+    createMap=map
+}
 import ceylon.test {
     test,
     assertEquals,
     assertThatException
 }
-import ru.qdzo.ceylon.config {
-    sanitizeKey,
-    Loader,
-    Environment
-}
-
-import ceylon.language { createMap = map }
 import ceylon.time {
     Date,
     Time,
     DateTime,
-    createDate = date,
-    createTime = time,
-    createDateTime = dateTime
+    createDate=date,
+    createTime=time,
+    createDateTime=dateTime,
+    now
+}
+
+import ru.qdzo.ceylon.config {
+    sanitizeKey,
+    Loader,
+    Environment,
+    envvar,
+    configure
+}
+import ru.qdzo.ceylon.config.loaders {
+    MapLoader
 }
 
 test
@@ -167,3 +175,106 @@ shared void shouldReturnNullOnGettingWrongVariableType() {
     assert(is Null tim = testEnv.getTimeOrNull("datetime"));
     assert(is Null dattim = testEnv.getDateTimeOrNull("date"));
 }
+
+
+class SomeConfig(
+        envvar("db.host")
+        shared String host,
+
+        envvar("db.port")
+        shared Integer port,
+
+        envvar("start.date")
+        shared Date startDate,
+
+        envvar("start.time")
+        shared Time startTime,
+
+        envvar("start.datetime")
+        shared DateTime startDateTime,
+
+        envvar("start.rank")
+        shared Float startRank,
+
+        envvar("start.ports")
+        shared [Integer*] ports,
+
+        envvar("start.hosts")
+        shared [String*] hosts,
+
+        envvar("floats")
+        shared {Float*} floats,
+        shared String? desc = null
+        ) {
+
+    shared actual Boolean equals(Object that) {
+        if (is SomeConfig that) {
+            return host==that.host &&
+                port==that.port &&
+                startDate==that.startDate &&
+                startTime==that.startTime &&
+                startDateTime==that.startDateTime &&
+                startRank==that.startRank &&
+                ports==that.ports &&
+                hosts==that.hosts &&
+                floats.sequence() ==that.floats.sequence();
+        }
+        else {
+            return false;
+        }
+    }
+
+    shared actual Integer hash {
+        variable value hash = 1;
+        hash = 31*hash + host.hash;
+        hash = 31*hash + port;
+        hash = 31*hash + startDate.hash;
+        hash = 31*hash + startTime.hash;
+        hash = 31*hash + startDateTime.hash;
+        hash = 31*hash + startRank.hash;
+        hash = 31*hash + ports.hash;
+        hash = 31*hash + hosts.hash;
+        hash = 31*hash + floats.hash;
+        return hash;
+    }
+     }
+
+test
+shared void injectorShouldInjectValues() {
+    value d = now().date();
+    value t = now().time();
+    value dt = now().dateTime();
+
+    value e = Environment({
+        MapLoader {
+            "db"-> map {
+                "host" -> "net",
+                "port" -> 8080
+            },
+            "start" -> map {
+                "date"-> d,
+                "time"-> t,
+                "dateTime" -> dt,
+                "rank" -> 7.0,
+                "ports" -> {80, 3000, 22, 8080, 5000},
+                "hosts" -> {"ya.ru", "github.com", "gmail.ru"}
+            },
+            "floats"->{1.0, 2.1, 3.0, 4.7}
+        }
+    });
+    assertEquals {
+        actual = configure<SomeConfig>(e);
+        expected = SomeConfig {
+            host = "net";
+            port = 8080;
+            startDate = d;
+            startTime = t;
+            startDateTime = dt;
+            startRank = 7.0;
+            ports = [80, 3000, 22, 8080, 5000];
+            hosts = ["ya.ru", "github.com", "gmail.ru"];
+            floats = [1.0, 2.1, 3.0, 4.7];
+        };
+    };
+}
+
