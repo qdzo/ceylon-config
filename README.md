@@ -26,7 +26,7 @@ Each next level overrides definitions from earlier levels.
 Add dependency to your `module.ceylon` file
 
 ```ceylon
-import ru.qdzo.ceylon.config "0.0.1";
+import ru.qdzo.ceylon.config "0.1.1";
 ```
 
 ## Usage
@@ -135,7 +135,7 @@ This is made to exclude ugly and buggy variable-names followed by index - `foo.1
 ### Using annotations to setup config-Classes and instantiate them
 
 It's convenient to use some class as configuration. 
-You may to annotate fields of that class with `envVar("varname")` annotation 
+You can annotate fields of that class with `envVar("varname")` annotation 
 and then get instantce of that class with specified parameters from the environment variables.
 
 Example:
@@ -190,21 +190,6 @@ shared void run() {
     serverStart();
 }
 ```
-
-### Custom loaders
-
-You can create custom config loader by extending `Loader` class and registering it in the system.
-
-Implementing loader
-
-```ceylon
-shared object mySecretLoader extends Loader() {
-    load => HashMap { sanitize("PASSWORD")->"SeCrEt" };
-}
-```
-
-You need to apply `sanitize` function for key, to bring it to common format (see above).
-
 
 ## Licence
 
