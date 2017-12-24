@@ -26,7 +26,7 @@ Each next level overrides definitions from earlier levels.
 Add dependency to your `module.ceylon` file
 
 ```ceylon
-import ru.qdzo.ceylon.config "0.1.1";
+import com.github.qdzo.config "0.1.1";
 ```
 
 ## Usage
@@ -53,7 +53,7 @@ Create `config.json` file in project root.
 Use `env` object to obtain variables.
 
 ```ceylon
-import ru.qdzo.ceylon.config { env }
+import com.github.qdzo.config { env }
 
 shared void run() {
     String dbHost = env.getString("database.host");            // asserts value existence

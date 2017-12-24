@@ -1,4 +1,4 @@
-import ru.qdzo.ceylon.config.loaders {
+import com.github.qdzo.config.loaders {
     systemPropsLoader,
     systemEnvLoader,
     JsonFileLoader,
@@ -28,7 +28,7 @@ shared void systemEnvLoaderShouldLoadRightVarsSize() {
 
 test
 shared void jsonLoaderShouldLoadVars() {
-     value loader = JsonFileLoader("./resource/ru/qdzo/ceylon/configtest/config.json");
+     value loader = JsonFileLoader("./resource/com/github/qdzo/configtest/config.json");
      value vars = loader.load;
      assertEquals("JsonLoader",            vars["name"]);
      assertEquals("1.0.0",                 vars["version"]);
@@ -39,7 +39,7 @@ shared void jsonLoaderShouldLoadVars() {
 
 test
 shared void tomlLoaderShouldLoadVars() {
-    value loader = TomlFileLoader("./resource/ru/qdzo/ceylon/configtest/config.toml");
+    value loader = TomlFileLoader("./resource/com/github/qdzo/configtest/config.toml");
     value vars = loader.load;
     assertEquals("Bob",       vars["user.name"]);
     assertEquals("80",        vars["user.age"]);

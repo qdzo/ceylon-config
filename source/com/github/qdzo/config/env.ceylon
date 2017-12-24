@@ -1,4 +1,4 @@
-import ru.qdzo.ceylon.config.loaders {
+import com.github.qdzo.config.loaders {
     cmdParamsLoader,
     systemPropsLoader,
     CustomConfigFileLoader,
@@ -16,7 +16,9 @@ import ru.qdzo.ceylon.config.loaders {
     loads system properties
 */
 
-"Creates environment singleton on first usage"
+"Creates environment singleton on first usage.
+ Loads variables from default loaders list."
+ see(`value loaders`)
 shared late Environment env = Environment(loaders);
 
 Set<Loader> _loaders = set {
@@ -30,6 +32,9 @@ Set<Loader> _loaders = set {
     systemPropsLoader
 };
 
+"Default loaders list, placed in special order.
+ `env` object should load variables from this list."
+see(`value env`)
 shared Set<Loader> loaders = _loaders;
 
 "Loads config.json stored in same dir where application starts"

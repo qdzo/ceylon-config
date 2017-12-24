@@ -27,7 +27,7 @@
    Add dependency to your `module.ceylon` file
 
    ```ceylon
-   import ru.qdzo.ceylon.config "0.0.1";
+   import com.github.qdzo.config "0.0.1";
    ```
 
    ## Usage
@@ -52,7 +52,7 @@
    Use `env` object to obtain variables.
 
    ```ceylon
-   import ru.qdzo.ceylon.config { env }
+   import com.github.qdzo.config { env }
 
    shared void run() {
        String dbHost = env.getString("database.host");            // asserts value existence
@@ -194,7 +194,7 @@
 """
 
 native("jvm")
-module ru.qdzo.ceylon.config "0.1.2-SNAPSHOT" {
+module com.github.qdzo.config "0.1.2" {
     import java.base "8";
     import ceylon.interop.java "1.3.3";
     import ceylon.file "1.3.3";
