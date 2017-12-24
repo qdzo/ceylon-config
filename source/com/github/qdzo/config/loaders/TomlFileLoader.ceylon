@@ -3,7 +3,7 @@ import ceylon.toml {
     parseToml
 }
 
-import ru.qdzo.ceylon.config {
+import com.github.qdzo.config {
     Loader,
     flattenMap,
     sanitizeVar

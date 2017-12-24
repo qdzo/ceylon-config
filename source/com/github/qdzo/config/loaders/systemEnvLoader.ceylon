@@ -6,7 +6,7 @@ import java.lang {
     System
 }
 
-import ru.qdzo.ceylon.config {
+import com.github.qdzo.config {
     Loader,
     sanitizeVar
 }

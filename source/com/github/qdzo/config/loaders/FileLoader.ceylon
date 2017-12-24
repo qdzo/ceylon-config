@@ -1,4 +1,4 @@
-import ru.qdzo.ceylon.config {
+import com.github.qdzo.config {
     Loader,
     readFile,
     emptyLoader
@@ -8,6 +8,8 @@ import ru.qdzo.ceylon.config {
  If file not exists or empty print warning and load no vars"
 shared class FileLoader extends Loader {
     Loader loader;
+
+    "Create FileLoader with given stringLoader delegate"
     shared new (String filename, Loader(String) stringLoader)
             extends Loader() {
         if(exists content = readFile(filename)) {

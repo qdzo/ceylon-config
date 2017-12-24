@@ -280,6 +280,20 @@
         <echo>Installation completed</echo>
     </target>
 
+    <target name="publish-herd" depends="-init">
+        <condition property="herd.pass" value="${pass}">
+            <isset property="pass"/>
+        </condition>
+
+        <fail message="specify herd password via -Dpass" unless:set="herd.pass"/>
+
+      <ceylon-compile out="https://modules.ceylon-lang.org/uploads/107747/repo/" user="qdzo" pass="${herd.pass}">
+        <module name="${run.module.name}"/>
+      </ceylon-compile>
+      <ceylon-doc out="https://modules.ceylon-lang.org/uploads/107747/repo/" user="qdzo" pass="${herd.pass}">
+        <module name="${run.module.name}"/>
+      </ceylon-doc>
+    </target>
 
     <target name="fat-jar" depends="compile" description="Generates fat-jar">
         <echo>Generating fat-jar for module: ${run.module.name}</echo>

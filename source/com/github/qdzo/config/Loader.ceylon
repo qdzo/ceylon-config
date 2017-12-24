@@ -5,10 +5,15 @@ import ceylon.file {
 }
 "Template class for creating custom config-loaders"
 shared abstract class Loader() {
+
+    "Loads environment variables from custom-source.
+     Key should be a string with '.' (dot) separator (Example: \"db.host\").
+     Item should be a pure-string"
     shared formal Map<String, String> load;
+
     equals(Object that) => switch (that)
-        case (is Loader) load==that.load
-        else false;
+    case (is Loader) load==that.load
+    else false;
     hash => load.hash;
 }
 
@@ -37,6 +42,7 @@ shared String sanitizeKey(String key) {
   return key;
 }
 
+"Transforms any object to string format"
 shared String sanitizeVal(Anything item) {
     if(is String item) {
         return item;

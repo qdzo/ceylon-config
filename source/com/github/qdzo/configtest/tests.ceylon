@@ -16,14 +16,14 @@ import ceylon.time {
     now
 }
 
-import ru.qdzo.ceylon.config {
+import com.github.qdzo.config {
     sanitizeKey,
     Loader,
     Environment,
     envVar,
     configure
 }
-import ru.qdzo.ceylon.config.loaders {
+import com.github.qdzo.config.loaders {
     MapLoader
 }
 
