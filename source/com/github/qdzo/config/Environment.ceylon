@@ -31,24 +31,24 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     get(Object key) => envVars[key];
 
 
-    throws(`class VariableNotFoundException`)
+    throws(`class EnvironmentVariableNotFoundException`)
     String getOrThrowIfNotFound(Object key){
         if(exists val = get(key)){
             return val;
         }
-        throw VariableNotFoundException(key.string);
+        throw EnvironmentVariableNotFoundException(key.string);
     }
 
     "Get `String` value for given key.
      throws error if value not present or it can not be parsed"
-    throws(`class VariableNotFoundException`)
+    throws(`class EnvironmentVariableNotFoundException`)
     shared String getString(Object key){
         return getOrThrowIfNotFound(key);
     }
 
     "Get `Integer` value for given key.
      throws error if value not present or it can not be parsed"
-    throws(`class VariableNotFoundException`)
+    throws(`class EnvironmentVariableNotFoundException`)
     throws(`class ParseException`)
     shared Integer getInteger(Object key){
         String val = getOrThrowIfNotFound(key);
@@ -64,7 +64,7 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
 
     "Get `Float` value for given key.
      throws error if value not present or it can not be parsed"
-    throws(`class VariableNotFoundException`)
+    throws(`class EnvironmentVariableNotFoundException`)
     throws(`class ParseException`)
     shared Float getFloat(Object key){
         String val = getOrThrowIfNotFound(key);
@@ -76,7 +76,7 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
 
     "Get `Date` value for given key.
      throws error if value not present or it can not be parsed"
-    throws(`class VariableNotFoundException`)
+    throws(`class EnvironmentVariableNotFoundException`)
     shared Date getDate(Object key){
         String val = getOrThrowIfNotFound(key);
         // REVIEW: If parseDate throws internally exceptions (Vitaly 08.02.18)
@@ -87,7 +87,7 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
 
     "Get `Time` value for given key.
      throws error if value not present or it can not be parsed"
-    throws(`class VariableNotFoundException`)
+    throws(`class EnvironmentVariableNotFoundException`)
     shared Time getTime(Object key){
         String val = getOrThrowIfNotFound(key);
         // REVIEW: If parseTime throws internally exceptions (Vitaly 08.02.18)
@@ -98,7 +98,7 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
 
     "Get `DateTime` value for given key.
      throws error if value not present or it can not be parsed"
-    throws(`class VariableNotFoundException`)
+    throws(`class EnvironmentVariableNotFoundException`)
     shared DateTime getDateTime(Object key){
         // REVIEW: If parseDateTime throws internally exceptions (Vitaly 08.02.18)
         String val = getOrThrowIfNotFound(key);
@@ -109,7 +109,7 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
 
     "Get `Boolean` value for given key.
      throws error if value not present or it can not be parsed"
-    throws(`class VariableNotFoundException`)
+    throws(`class EnvironmentVariableNotFoundException`)
     throws(`class ParseException`)
     shared Boolean getBoolean(Object key){
         String val = getOrThrowIfNotFound(key);
@@ -122,7 +122,7 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     shared String? getStringOrNull(Object key){
         try {
             return getString(key);
-        } catch(VariableNotFoundException|ParseException e) {
+        } catch(EnvironmentVariableNotFoundException|ParseException e) {
             log.warn(e.message);
             return null;
         }
@@ -132,7 +132,7 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     shared Integer? getIntegerOrNull(Object key){
         try {
             return getInteger(key);
-        } catch(VariableNotFoundException|ParseException e) {
+        } catch(EnvironmentVariableNotFoundException|ParseException e) {
             log.warn(e.message);
             return null;
         }
@@ -142,7 +142,7 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     shared Float? getFloatOrNull(Object key){
         try {
             return getFloat(key);
-        } catch(VariableNotFoundException|ParseException e) {
+        } catch(EnvironmentVariableNotFoundException|ParseException e) {
             log.warn(e.message);
             return null;
         }
@@ -152,7 +152,7 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     shared Date? getDateOrNull(Object key){
         try {
             return getDate(key);
-        } catch(VariableNotFoundException|ParseException e) {
+        } catch(EnvironmentVariableNotFoundException|ParseException e) {
             log.warn(e.message);
             return null;
         }
@@ -162,7 +162,7 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     shared Time? getTimeOrNull(Object key){
         try {
             return getTime(key);
-        } catch(VariableNotFoundException|ParseException e) {
+        } catch(EnvironmentVariableNotFoundException|ParseException e) {
             log.warn(e.message);
             return null;
         }
@@ -172,7 +172,7 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     shared DateTime? getDateTimeOrNull(Object key){
         try {
             return getDateTime(key);
-        } catch(VariableNotFoundException|ParseException e) {
+        } catch(EnvironmentVariableNotFoundException|ParseException e) {
             log.warn(e.message);
             return null;
         }
@@ -182,7 +182,7 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     shared Boolean? getBooleanOrNull(Object key){
         try {
             return getBoolean(key);
-        } catch(VariableNotFoundException|ParseException e) {
+        } catch(EnvironmentVariableNotFoundException|ParseException e) {
             log.warn(e.message);
             return null;
         }
@@ -206,6 +206,3 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     hash => envVars.hash;
 
 }
-
-shared class VariableNotFoundException(String varName)
-        extends Exception("Variable [``varName``] not found in environment") { }

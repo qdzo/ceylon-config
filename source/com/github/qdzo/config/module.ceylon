@@ -189,7 +189,7 @@
 
    * Fields must be *one* of the basic types (`Boolean`, `Integer`, `Float`, `String`, `Date`, `Time`, `DateTime`) or sequence/iterable of them.
    * Fields with default values are treated as `optional` fields, and may not have value in environment.
-   * If some variable is not exists in the environment then `AssertionError` will be thrown while `configure<Type>`.
+   * If some variable is not exists in the environment then `EnvironmentVariableNotFoundException` will be thrown while `configure<Type>`.
 
 """
 
