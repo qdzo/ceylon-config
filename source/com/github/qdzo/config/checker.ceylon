@@ -37,7 +37,7 @@ Module[] excludeLanguageModules = [
  By default scan all runtime modules.
  Throws exception when requirement violated"
 see(`class RequireEnvAnnotation`)
-throws(`class AssertionError`)
+throws(`class EnvironmentVariableNotFoundException`)
 shared void checkEnvRequirements(Module[] mods = excludeLanguageModules) {
     MutableSet<String> vars = HashSet<String>();
     for (mod in mods) {
@@ -57,6 +57,6 @@ shared void checkEnvRequirements(Module[] mods = excludeLanguageModules) {
         }
     }
     if(nonempty missedVars = [for (key in vars) if(!exists val = env[key]) key ]) {
-        throw AssertionError("[``", ".join(missedVars)``] - variable(s) should be specified in environment");
+        throw EnvironmentVariableNotFoundException(", ".join(missedVars));
     }
 }

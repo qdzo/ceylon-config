@@ -82,7 +82,7 @@ Map<ClassOrInterfaceDeclaration, Anything(String)> typeParsers = map {
 
 "Instantiate class with values taken from environment variables.
  Given class need to annotate it's fields with `envVar` annotation"
-throws(`class AssertionError`, "when some of the variables not exists in the environment")
+throws(`class EnvironmentVariableNotFoundException`, "when some of the variables not exists in the environment")
 shared T configure<out T>(Environment environment = env) {
     value configuredType = `T`;
     "Type to configurate should be a class"
@@ -133,7 +133,7 @@ shared T configure<out T>(Environment environment = env) {
     value params = strictFields.collect(fillParam);
 
     if(nonempty unspecified = [for (_->[name, val] in params) if(is Null val) name]) {
-        throw AssertionError( "[``", ".join(unspecified)``] - variable(s) should be specified in environment");
+        throw EnvironmentVariableNotFoundException(", ".join(unspecified));
     }
 
     value optionalParams  = optionalFields.collect(fillParam);
