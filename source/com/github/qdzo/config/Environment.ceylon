@@ -30,73 +30,100 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
 
     get(Object key) => envVars[key];
 
+
+    throws(`class VariableNotFoundException`)
+    String getOrThrowIfNotFound(Object key){
+        if(exists val = get(key)){
+            return val;
+        }
+        throw VariableNotFoundException(key.string);
+    }
+
     "Get `String` value for given key.
      throws error if value not present or it can not be parsed"
-    throws(`class AssertionError`)
+    throws(`class VariableNotFoundException`)
     shared String getString(Object key){
-        assert(exists val = get(key));
-        return val;
+        return getOrThrowIfNotFound(key);
     }
 
     "Get `Integer` value for given key.
      throws error if value not present or it can not be parsed"
-    throws(`class AssertionError`)
+    throws(`class VariableNotFoundException`)
+    throws(`class ParseException`)
     shared Integer getInteger(Object key){
-        assert(exists val = get(key));
-        assert(is Integer intVal = Integer.parse(val));
-        return intVal;
+        String val = getOrThrowIfNotFound(key);
+
+        switch(intOrException = Integer.parse(val))
+        case (is ParseException) {
+            throw ParseException("Variable with name [``key.string``] can't be parsed: ``intOrException.message``");
+        }
+        else {
+            return intOrException;
+        }
     }
 
     "Get `Float` value for given key.
      throws error if value not present or it can not be parsed"
-    throws(`class AssertionError`)
+    throws(`class VariableNotFoundException`)
+    throws(`class ParseException`)
     shared Float getFloat(Object key){
-        assert(exists val = get(key));
-        assert(is Float floatVal = Float.parse(val));
-        return floatVal;
+        String val = getOrThrowIfNotFound(key);
+
+        switch(floatOrException = Float.parse(val))
+        case (is ParseException) { throw ParseException("Variable with name [``key.string``] can't be parsed: ``floatOrException.message``"); }
+        else { return floatOrException; }
     }
 
     "Get `Date` value for given key.
      throws error if value not present or it can not be parsed"
-    throws(`class AssertionError`)
+    throws(`class VariableNotFoundException`)
     shared Date getDate(Object key){
-        assert(exists val = get(key));
-        assert(is Date dateVal = parseDate(val));
-        return dateVal;
+        String val = getOrThrowIfNotFound(key);
+        // REVIEW: If parseDate throws internally exceptions (Vitaly 08.02.18)
+        switch(dateOrNull = parseDate(val))
+        case (is Null) { throw ParseException("Variable with name [``key.string``] can't be parsed as Date: ``val``"); }
+        else { return dateOrNull; }
     }
 
     "Get `Time` value for given key.
      throws error if value not present or it can not be parsed"
-    throws(`class AssertionError`)
+    throws(`class VariableNotFoundException`)
     shared Time getTime(Object key){
-        assert(exists val = get(key));
-        assert(is Time timeVal = parseTime(val));
-        return timeVal;
+        String val = getOrThrowIfNotFound(key);
+        // REVIEW: If parseTime throws internally exceptions (Vitaly 08.02.18)
+        switch(timeOrNull = parseTime(val))
+        case (is Null) { throw ParseException("Variable with name [``key.string``] can't be parsed as Time: ``val``"); }
+        else { return timeOrNull; }
     }
 
     "Get `DateTime` value for given key.
      throws error if value not present or it can not be parsed"
-    throws(`class AssertionError`)
+    throws(`class VariableNotFoundException`)
     shared DateTime getDateTime(Object key){
-        assert(exists val = get(key));
-        assert(is DateTime dateTimeVal = parseDateTime(val));
-        return dateTimeVal;
+        // REVIEW: If parseDateTime throws internally exceptions (Vitaly 08.02.18)
+        String val = getOrThrowIfNotFound(key);
+        switch(dateTimeOrNull = parseDateTime(val))
+        case (is Null) { throw ParseException("Variable with name [``key.string``] can't be parsed as DateTime: ``val``"); }
+        else { return dateTimeOrNull; }
     }
 
     "Get `Boolean` value for given key.
      throws error if value not present or it can not be parsed"
-    throws(`class AssertionError`)
+    throws(`class VariableNotFoundException`)
+    throws(`class ParseException`)
     shared Boolean getBoolean(Object key){
-        assert(exists val = get(key));
-        assert(is Boolean booleanVal = Boolean.parse(val));
-        return booleanVal;
+        String val = getOrThrowIfNotFound(key);
+        switch(booleanOrException = Boolean.parse(val))
+        case (is ParseException) { throw ParseException("Variable with name [``key.string``] can't be parsed: ``booleanOrException.message``"); }
+        else { return booleanOrException; }
     }
 
     "Get `String` value for given key or null if value is not present or can not be parsed"
     shared String? getStringOrNull(Object key){
         try {
             return getString(key);
-        } catch(AssertionError ae) {
+        } catch(VariableNotFoundException|ParseException e) {
+            log.warn(e.message);
             return null;
         }
     }
@@ -105,7 +132,8 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     shared Integer? getIntegerOrNull(Object key){
         try {
             return getInteger(key);
-        } catch(AssertionError ae) {
+        } catch(VariableNotFoundException|ParseException e) {
+            log.warn(e.message);
             return null;
         }
     }
@@ -114,7 +142,8 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     shared Float? getFloatOrNull(Object key){
         try {
             return getFloat(key);
-        } catch(AssertionError ae) {
+        } catch(VariableNotFoundException|ParseException e) {
+            log.warn(e.message);
             return null;
         }
     }
@@ -123,7 +152,8 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     shared Date? getDateOrNull(Object key){
         try {
             return getDate(key);
-        } catch(AssertionError ae) {
+        } catch(VariableNotFoundException|ParseException e) {
+            log.warn(e.message);
             return null;
         }
     }
@@ -132,7 +162,8 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     shared Time? getTimeOrNull(Object key){
         try {
             return getTime(key);
-        } catch(AssertionError ae) {
+        } catch(VariableNotFoundException|ParseException e) {
+            log.warn(e.message);
             return null;
         }
     }
@@ -141,7 +172,8 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     shared DateTime? getDateTimeOrNull(Object key){
         try {
             return getDateTime(key);
-        } catch(AssertionError ae) {
+        } catch(VariableNotFoundException|ParseException e) {
+            log.warn(e.message);
             return null;
         }
     }
@@ -150,7 +182,8 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     shared Boolean? getBooleanOrNull(Object key){
         try {
             return getBoolean(key);
-        } catch(AssertionError ae) {
+        } catch(VariableNotFoundException|ParseException e) {
+            log.warn(e.message);
             return null;
         }
     }
@@ -173,3 +206,6 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     hash => envVars.hash;
 
 }
+
+shared class VariableNotFoundException(String varName)
+        extends Exception("Variable [``varName``] not found in environment") { }
