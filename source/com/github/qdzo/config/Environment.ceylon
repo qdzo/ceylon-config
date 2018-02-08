@@ -30,7 +30,6 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
 
     get(Object key) => envVars[key];
 
-
     throws(`class EnvironmentVariableNotFoundException`)
     String getOrThrowIfNotFound(Object key){
         if(exists val = get(key)){
@@ -38,11 +37,11 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
         }
         throw EnvironmentVariableNotFoundException(key.string);
     }
-
+    
     "Get `String` value for given key.
      throws error if value not present or it can not be parsed"
     throws(`class EnvironmentVariableNotFoundException`)
-    shared String getString(Object key){
+    shared String requireString(Object key){
         return getOrThrowIfNotFound(key);
     }
 
@@ -50,12 +49,14 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
      throws error if value not present or it can not be parsed"
     throws(`class EnvironmentVariableNotFoundException`)
     throws(`class ParseException`)
-    shared Integer getInteger(Object key){
+    shared Integer requireInteger(Object key){
         String val = getOrThrowIfNotFound(key);
 
         switch(intOrException = Integer.parse(val))
         case (is ParseException) {
-            throw ParseException("Variable with name [``key.string``] can't be parsed: ``intOrException.message``");
+            throw ParseException {
+                message = "Variable with name [``key.string``] can't be parsed: ``intOrException.message``";
+            };
         }
         else {
             return intOrException;
@@ -66,52 +67,73 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
      throws error if value not present or it can not be parsed"
     throws(`class EnvironmentVariableNotFoundException`)
     throws(`class ParseException`)
-    shared Float getFloat(Object key){
+    shared Float requireFloat(Object key){
         String val = getOrThrowIfNotFound(key);
 
         switch(floatOrException = Float.parse(val))
-        case (is ParseException) { throw ParseException("Variable with name [``key.string``] can't be parsed: ``floatOrException.message``"); }
-        else { return floatOrException; }
+        case (is ParseException) {
+            throw ParseException {
+                message = "Variable with name [``key.string``] can't be parsed: ``floatOrException.message``";
+            };
+        }
+        else {
+            return floatOrException;
+        }
     }
 
     "Get `Date` value for given key.
      throws error if value not present or it can not be parsed"
     throws(`class EnvironmentVariableNotFoundException`)
-    shared Date getDate(Object key){
+    shared Date requireDate(Object key){
         String val = getOrThrowIfNotFound(key);
-        // REVIEW: If parseDate throws internally exceptions (Vitaly 08.02.18)
         switch(dateOrNull = parseDate(val))
-        case (is Null) { throw ParseException("Variable with name [``key.string``] can't be parsed as Date: ``val``"); }
-        else { return dateOrNull; }
+        case (is Null) {
+            throw ParseException {
+                message = "Variable with name [``key.string``] can't be parsed as Date: ``val``";
+            };
+        }
+        else {
+            return dateOrNull;
+        }
     }
 
     "Get `Time` value for given key.
      throws error if value not present or it can not be parsed"
     throws(`class EnvironmentVariableNotFoundException`)
-    shared Time getTime(Object key){
+    shared Time requireTime(Object key){
         String val = getOrThrowIfNotFound(key);
-        // REVIEW: If parseTime throws internally exceptions (Vitaly 08.02.18)
         switch(timeOrNull = parseTime(val))
-        case (is Null) { throw ParseException("Variable with name [``key.string``] can't be parsed as Time: ``val``"); }
-        else { return timeOrNull; }
+        case (is Null) {
+            throw ParseException {
+                message = "Variable with name [``key.string``] can't be parsed as Time: ``val``";
+            };
+        }
+        else {
+            return timeOrNull;
+        }
     }
 
     "Get `DateTime` value for given key.
      throws error if value not present or it can not be parsed"
     throws(`class EnvironmentVariableNotFoundException`)
-    shared DateTime getDateTime(Object key){
-        // REVIEW: If parseDateTime throws internally exceptions (Vitaly 08.02.18)
+    shared DateTime requireDateTime(Object key){
         String val = getOrThrowIfNotFound(key);
         switch(dateTimeOrNull = parseDateTime(val))
-        case (is Null) { throw ParseException("Variable with name [``key.string``] can't be parsed as DateTime: ``val``"); }
-        else { return dateTimeOrNull; }
+        case (is Null) {
+            throw ParseException {
+                message = "Variable with name [``key.string``] can't be parsed as DateTime: ``val``";
+            };
+        }
+        else {
+            return dateTimeOrNull;
+        }
     }
 
     "Get `Boolean` value for given key.
      throws error if value not present or it can not be parsed"
     throws(`class EnvironmentVariableNotFoundException`)
     throws(`class ParseException`)
-    shared Boolean getBoolean(Object key){
+    shared Boolean requireBoolean(Object key){
         String val = getOrThrowIfNotFound(key);
         switch(booleanOrException = Boolean.parse(val))
         case (is ParseException) { throw ParseException("Variable with name [``key.string``] can't be parsed: ``booleanOrException.message``"); }
@@ -119,9 +141,9 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     }
 
     "Get `String` value for given key or null if value is not present or can not be parsed"
-    shared String? getStringOrNull(Object key){
+    shared String? getString(Object key){
         try {
-            return getString(key);
+            return requireString(key);
         } catch(EnvironmentVariableNotFoundException|ParseException e) {
             log.warn(e.message);
             return null;
@@ -129,9 +151,9 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     }
 
     "Get `Integer` value for given key or null if value is not present or can not be parsed"
-    shared Integer? getIntegerOrNull(Object key){
+    shared Integer? getInteger(Object key){
         try {
-            return getInteger(key);
+            return requireInteger(key);
         } catch(EnvironmentVariableNotFoundException|ParseException e) {
             log.warn(e.message);
             return null;
@@ -139,9 +161,9 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     }
 
     "Get `Float` value for given key or null if value is not present or can not be parsed"
-    shared Float? getFloatOrNull(Object key){
+    shared Float? getFloat(Object key){
         try {
-            return getFloat(key);
+            return requireFloat(key);
         } catch(EnvironmentVariableNotFoundException|ParseException e) {
             log.warn(e.message);
             return null;
@@ -149,9 +171,9 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     }
 
     "Get `Date` value for given key or null if value is not present or can not be parsed"
-    shared Date? getDateOrNull(Object key){
+    shared Date? getDate(Object key){
         try {
-            return getDate(key);
+            return requireDate(key);
         } catch(EnvironmentVariableNotFoundException|ParseException e) {
             log.warn(e.message);
             return null;
@@ -159,9 +181,9 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     }
 
     "Get `Time` value for given key or null if value is not present or can not be parsed"
-    shared Time? getTimeOrNull(Object key){
+    shared Time? getTime(Object key){
         try {
-            return getTime(key);
+            return requireTime(key);
         } catch(EnvironmentVariableNotFoundException|ParseException e) {
             log.warn(e.message);
             return null;
@@ -169,9 +191,9 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     }
 
     "Get `DateTime` value for given key or null if value is not present or can not be parsed"
-    shared DateTime? getDateTimeOrNull(Object key){
+    shared DateTime? getDateTime(Object key){
         try {
-            return getDateTime(key);
+            return requireDateTime(key);
         } catch(EnvironmentVariableNotFoundException|ParseException e) {
             log.warn(e.message);
             return null;
@@ -179,9 +201,9 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
     }
 
     "Get `Boolean` value for given key or null if value is not present or can not be parsed"
-    shared Boolean? getBooleanOrNull(Object key){
+    shared Boolean? getBoolean(Object key) {
         try {
-            return getBoolean(key);
+            return requireBoolean(key);
         } catch(EnvironmentVariableNotFoundException|ParseException e) {
             log.warn(e.message);
             return null;

@@ -56,10 +56,10 @@ Use `env` object to obtain variables.
 import com.github.qdzo.config { env }
 
 shared void run() {
-    String dbHost = env.getString("database.host");            // asserts value existence
-    Integer dbPort = env.getInteger("database.port");          // asserts existence and try parse-integer 
-    String? dbUser = env.getStringOrNull("database.user");     // optional parameter
-    String? dbPass = env["database.password"];                 // env satisfies Map<String,String>
+    String dbHost = env.requireString("database.host");            // asserts value existence
+    Integer dbPort = env.requireInteger("database.port");          // asserts existence and try parse-integer
+    String? dbUser = env.getString("database.user");               // optional parameter
+    String? dbPass = env["database.password"];                     // env satisfies Map<String,String>
     
     value connection = connectDb(dbHost, dbPort, dbUser, dbPass);
     ...
@@ -177,8 +177,8 @@ you would annotate your method with `requiredEnv` annotation and call `checkEnvR
 ```ceylon
 requiredEnv("web.host", "web.port") // method required some envirnment variables
 shared startServer() {
-    String host = env.getString("web.host");
-    Integer port = env.getInteger("web.port");
+    String host = env.requireString("web.host");
+    Integer port = env.requireInteger("web.port");
     value server = newServer({});
     server.start(SocketAddress(host, port));
 }

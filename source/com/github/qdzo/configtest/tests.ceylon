@@ -71,13 +71,13 @@ Environment testEnv = Environment {
 
 test
 shared void shouldParseStrings() {
-    String str = testEnv.getString("string");
-    Integer int = testEnv.getInteger("integer");
-    Float flt = testEnv.getFloat("float");
-    Boolean bool = testEnv.getBoolean("boolean");
-    Date date = testEnv.getDate("date");
-    Time time = testEnv.getTime("time");
-    DateTime dateTime = testEnv.getDateTime("datetime");
+    String str = testEnv.requireString("string");
+    Integer int = testEnv.requireInteger("integer");
+    Float flt = testEnv.requireFloat("float");
+    Boolean bool = testEnv.requireBoolean("boolean");
+    Date date = testEnv.requireDate("date");
+    Time time = testEnv.requireTime("time");
+    DateTime dateTime = testEnv.requireDateTime("datetime");
     assertEquals(str, "first");
     assertEquals(int, 10);
     assertEquals(flt, 11.1);
@@ -91,25 +91,25 @@ test
 shared void shouldThrowExceptionOnGettingNonExistentVariable() {
     // non existing keys
     assertThatException((){
-        testEnv.getString("str");
+        testEnv.requireString("str");
     });
     assertThatException((){
-        testEnv.getInteger("int");
+        testEnv.requireInteger("int");
     });
     assertThatException((){
-        testEnv.getFloat("flt");
+        testEnv.requireFloat("flt");
     });
     assertThatException((){
-        testEnv.getBoolean("bool");
+        testEnv.requireBoolean("bool");
     });
     assertThatException((){
-        testEnv.getDate("dat");
+        testEnv.requireDate("dat");
     });
     assertThatException((){
-        testEnv.getTime("tim");
+        testEnv.requireTime("tim");
     });
     assertThatException((){
-        testEnv.getDateTime("dattim");
+        testEnv.requireDateTime("dattim");
     });
 
 }
@@ -117,34 +117,34 @@ shared void shouldThrowExceptionOnGettingNonExistentVariable() {
 test
 shared void shouldThrowExceptionOnGettingWrongVariableType() {
     assertThatException((){
-        testEnv.getInteger("float");
+        testEnv.requireInteger("float");
     });
     assertThatException((){
-        testEnv.getFloat("boolean");
+        testEnv.requireFloat("boolean");
     });
     assertThatException((){
-        testEnv.getBoolean("string");
+        testEnv.requireBoolean("string");
     });
     assertThatException((){
-        testEnv.getDate("time");
+        testEnv.requireDate("time");
     });
     assertThatException((){
-        testEnv.getTime("datetime");
+        testEnv.requireTime("datetime");
     });
     assertThatException((){
-        testEnv.getDateTime("date");
+        testEnv.requireDateTime("date");
     });
 }
 
 test
 shared void shouldParseStrings2() {
-    assert(is String str = testEnv.getStringOrNull("string"));
-    assert(is Integer int = testEnv.getIntegerOrNull("integer"));
-    assert(is Float flt = testEnv.getFloatOrNull("float"));
-    assert(is Boolean bool = testEnv.getBooleanOrNull("boolean"));
-    assert(is Date date = testEnv.getDateOrNull("date"));
-    assert(is Time time = testEnv.getTimeOrNull("time"));
-    assert(is DateTime dateTime = testEnv.getDateTimeOrNull("datetime"));
+    assert(is String str = testEnv.getString("string"));
+    assert(is Integer int = testEnv.getInteger("integer"));
+    assert(is Float flt = testEnv.getFloat("float"));
+    assert(is Boolean bool = testEnv.getBoolean("boolean"));
+    assert(is Date date = testEnv.getDate("date"));
+    assert(is Time time = testEnv.getTime("time"));
+    assert(is DateTime dateTime = testEnv.getDateTime("datetime"));
     assertEquals(str, "first");
     assertEquals(int, 10);
     assertEquals(flt, 11.1);
@@ -157,23 +157,23 @@ shared void shouldParseStrings2() {
 test
 shared void shouldReturnNullOnGettingNonExistentVariable() {
     // non existing keys
-    assert(is Null str = testEnv.getStringOrNull("str"));
-    assert(is Null int = testEnv.getIntegerOrNull("int"));
-    assert(is Null flt = testEnv.getFloatOrNull("flt"));
-    assert(is Null bool = testEnv.getBooleanOrNull("bool"));
-    assert(is Null dat = testEnv.getDateOrNull("dat"));
-    assert(is Null tim = testEnv.getTimeOrNull("tim"));
-    assert(is Null dattim = testEnv.getDateTimeOrNull("dattim"));
+    assert(is Null str = testEnv.getString("str"));
+    assert(is Null int = testEnv.getInteger("int"));
+    assert(is Null flt = testEnv.getFloat("flt"));
+    assert(is Null bool = testEnv.getBoolean("bool"));
+    assert(is Null dat = testEnv.getDate("dat"));
+    assert(is Null tim = testEnv.getTime("tim"));
+    assert(is Null dattim = testEnv.getDateTime("dattim"));
 }
 
 test
 shared void shouldReturnNullOnGettingWrongVariableType() {
-    assert(is Null int = testEnv.getIntegerOrNull("float"));
-    assert(is Null flt = testEnv.getFloatOrNull("boolean"));
-    assert(is Null boo = testEnv.getBooleanOrNull("string"));
-    assert(is Null dat = testEnv.getDateOrNull("time"));
-    assert(is Null tim = testEnv.getTimeOrNull("datetime"));
-    assert(is Null dattim = testEnv.getDateTimeOrNull("date"));
+    assert(is Null int = testEnv.getInteger("float"));
+    assert(is Null flt = testEnv.getFloat("boolean"));
+    assert(is Null boo = testEnv.getBoolean("string"));
+    assert(is Null dat = testEnv.getDate("time"));
+    assert(is Null tim = testEnv.getTime("datetime"));
+    assert(is Null dattim = testEnv.getDateTime("date"));
 }
 
 
