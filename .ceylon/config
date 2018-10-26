@@ -1,6 +1,7 @@
 
 [compiler]
 source=source
+source=test
 resource=resource
 
 [defaults]
