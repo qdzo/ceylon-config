@@ -33,7 +33,7 @@ shared class Environment({Loader*} loaders) satisfies Map<String, String> {
 
     throws(`class EnvironmentVariableNotFoundException`)
     String getOrThrowIfNotFound(Object key){
-        if(exists val = get(key)){
+        if(exists val = get(sanitizeKey(key.string))){
             return val;
         }
         throw EnvironmentVariableNotFoundException(key.string);

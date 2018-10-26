@@ -1,10 +1,14 @@
 import ceylon.language {
     createMap=map
 }
+import ceylon.language.meta {
+    type
+}
 import ceylon.test {
     test,
     assertEquals,
-    assertThatException
+    assertThatException,
+    createTestRunner
 }
 import ceylon.time {
     Date,
@@ -25,6 +29,10 @@ import com.github.qdzo.config {
 }
 import com.github.qdzo.config.loaders {
     MapLoader
+}
+
+shared void run() {
+    print(createTestRunner([`module com.github.qdzo.configtest`]).run());
 }
 
 test
@@ -204,6 +212,8 @@ class SomeConfig(
 
         envVar ("floats")
         shared {Float*} floats,
+
+        envVar ("desc")
         shared String? desc = null
         ) {
 
@@ -240,7 +250,7 @@ class SomeConfig(
      }
 
 test
-shared void injectorShouldInjectValues() {
+shared void injectorShouldInjectValuesWithDefaultParameters() {
     value d = now().date();
     value t = now().time();
     value dt = now().dateTime();
@@ -274,7 +284,82 @@ shared void injectorShouldInjectValues() {
             ports = [80, 3000, 22, 8080, 5000];
             hosts = ["ya.ru", "github.com", "gmail.ru"];
             floats = [1.0, 2.1, 3.0, 4.7];
+            desc = null;
         };
     };
 }
 
+test
+shared void injectorShouldInjectUnionValues() {
+    value d = now().date();
+    value t = now().time();
+    value dt = now().dateTime();
+
+    value e = Environment({
+        MapLoader {
+            "db"-> map {
+                "host" -> "net",
+                "port" -> 8080
+            },
+            "start" -> map {
+                "date"-> d,
+                "time"-> t,
+                "dateTime" -> dt,
+                "rank" -> 7.0,
+                "ports" -> {80, 3000, 22, 8080, 5000},
+                "hosts" -> {"ya.ru", "github.com", "gmail.ru"}
+            },
+            "floats"->{1.0, 2.1, 3.0, 4.7},
+            "desc"-> "Some description"
+        }
+    });
+    assertEquals {
+        actual = configure<SomeConfig>(e);
+        expected = SomeConfig {
+            host = "net";
+            port = 8080;
+            startDate = d;
+            startTime = t;
+            startDateTime = dt;
+            startRank = 7.0;
+            ports = [80, 3000, 22, 8080, 5000];
+            hosts = ["ya.ru", "github.com", "gmail.ru"];
+            floats = [1.0, 2.1, 3.0, 4.7];
+            desc = null;
+        };
+    };
+}
+
+class SmallConfig(
+    envVar("wordsAndNums")
+    shared [String|Integer*] wordsAndNums) {
+
+    string => "SmallConfig[ ``type(wordsAndNums)`` wordsAndNums = ``wordsAndNums``]";
+    shared actual Boolean equals(Object that) {
+        if (is SmallConfig that) {
+            return wordsAndNums==that.wordsAndNums;
+        }
+        else {
+            return false;
+        }
+    }
+
+    shared actual Integer hash => wordsAndNums.hash;
+
+}
+
+test
+shared void injectorShouldInjectSequenceWithUnionValues() {
+
+    value e = Environment({
+        MapLoader {
+            "wordsAndNums"-> {"one", 1, "two", 2}
+        }
+    });
+    assertEquals {
+        actual = configure<SmallConfig>(e);
+        expected = SmallConfig {
+            wordsAndNums = ["one", 1, "two", 2];
+        };
+    };
+}

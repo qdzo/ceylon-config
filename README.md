@@ -191,6 +191,21 @@ shared void run() {
 }
 ```
 
+## Changelog
+
+#### 1.0.3
+
+* Replace AssertionErrors with Custom Exceptions
+
+
+#### 1.1.0
+
+* Improved injector capabilities
+   * Add support for union-types (`String|Integer|Null`)
+   * Add support for heterogeneous sequences (`[String|Integer*]`)
+* Add internal sanitizers(lowercase) to `envVar` parameter and `get*` methods
+    > Now you can call `get*` methods and use `envVar` annotation with camelCase strings
+
 ## Licence
 
 Distributed under the Apache License, Version 2.0.

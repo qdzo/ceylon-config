@@ -2,13 +2,15 @@ import ceylon.collection {
     partition
 }
 import ceylon.language.meta {
-    annotations
+    annotations,
+    type
 }
 import ceylon.language.meta.declaration {
     ValueDeclaration,
     OpenType,
     OpenClassOrInterfaceType,
-    ClassOrInterfaceDeclaration
+    ClassOrInterfaceDeclaration,
+    OpenUnion
 }
 import ceylon.language.meta.model {
     Class
@@ -70,77 +72,158 @@ Boolean? parseBoolean(String str)
         => if(is Boolean b = Boolean.parse(str))
            then b else null;
 
+// special typeParsers - order - from more specific to more generic
 Map<ClassOrInterfaceDeclaration, Anything(String)> typeParsers = map {
-    `class Integer` -> parseInteger,
     `class Float` -> parseFloat,
+    `class Integer` -> parseInteger,
     `class Boolean` -> parseBoolean,
-    `class String` -> String,
     `interface Date` -> parseDate,
     `interface Time` -> parseTime,
-    `interface DateTime` -> parseDateTime
+    `interface DateTime` -> parseDateTime,
+    `class String` -> String
 };
+
+"Try convert string to one of given types:
+
+  - union-type of common-data-types
+  - sequence-type of common-data-types
+  - common-data-types
+
+  > PS: common-data-types - that have [[typeParsers]]"
+Anything tryConvertStringToOpenType(String stringValue, OpenType openType) {
+
+    switch(openType)
+    case (is OpenClassOrInterfaceType) {
+        return if(openType.declaration in {`interface Sequential`, `interface Iterable`})
+        then tryConvertStringToSequeceOpenType(stringValue, openType)
+        else tryConvertStringToOneOfOpenTypes(stringValue, [openType]);
+    }
+    case (is OpenUnion) {
+        return tryConvertStringToOneOfOpenTypes(stringValue, openType.caseTypes);
+    }
+    else {
+        log.warn("Not suppported openType: ``openType``");
+        return null;
+    }
+}
+
+"Try convert string to sequence-type of common-data-types
+
+  > PS: common-data-types - that have [[typeParsers]]"
+Anything tryConvertStringToSequeceOpenType(
+        String stringValue, OpenClassOrInterfaceType openType) {
+
+    value res = [
+        for (stringElement in splitStringList(stringValue))
+        if(exists typeArg = openType.typeArgumentList.first)
+        tryConvertStringToOneOfOpenTypes(stringElement, [typeArg])
+    ];
+    return res.tuple();
+    // tuple() is hack fn - it narrows collection type-argument without meta-model.
+}
+
+"Try convert string to one of common-data-type, that have [[typeParsers]].
+
+  > PS: common-data-types - that have `typeParsers`"
+Anything tryConvertStringToOneOfOpenTypes(String stringValue, List<OpenType> openTypes) {
+// TODO: Refactor this ugly part (Vitaly 26.10.18)
+    print("ONEOF: ``stringValue`` oneOF ``openTypes``");
+
+    /*
+       NOTE:
+         union types (example: `Integer|String` and `String|Union`)
+         can have different order - and we potentially can build wrong values.
+         in this way we we need special order specified parsers -> generic parsers
+    */
+    if(openTypes.size > 1) {
+        value classOrIntefacaes = openTypes.narrow<OpenClassOrInterfaceType>()*.declaration;
+        print("classOrIntefacaes: ``type(openTypes)``, ``type(classOrIntefacaes)``");
+        for (decl->parse in typeParsers) {
+            if(decl in classOrIntefacaes,
+                exists res = parse(stringValue)) {
+                print("FOUND: ``res``");
+                return res;
+            }
+        }
+        return null;
+    }
+
+    "At least one openType should exists"
+    assert(exists openType = openTypes.first);
+
+    if(is OpenClassOrInterfaceType openType,
+        exists parse = typeParsers[openType.declaration],
+        exists res = parse(stringValue)) {
+        print("ONEOF: ``stringValue`` is ``openType``: - ``res``");
+        return res;
+    }
+    // if union - call inself with case types
+    if(is OpenUnion openType) {
+        return tryConvertStringToOneOfOpenTypes(stringValue, openType.caseTypes);
+    }
+    print("ONEOF: not found type");
+    log.warn("Can't convert string ``stringValue`` to one of:  ``openTypes``");
+    return null;
+}
+
+
+"Sanitized Environment Variable Name. (example: 'db.name', 'server.port')"
+alias EnvVarName => String;
+
+"Object field name"
+alias FieldName => String;
 
 "Instantiate class with values taken from environment variables.
  Given class need to annotate it's fields with `envVar` annotation"
 throws(`class EnvironmentVariableNotFoundException`, "when some of the variables not exists in the environment")
 shared T configure<out T>(Environment environment = env) {
+
     value configuredType = `T`;
     "Type to configurate should be a class"
     assert(is Class<T> configuredType);
 
-    <String->ValueDeclaration>[]
+    <EnvVarName->ValueDeclaration>[]
     envVarNameToFieldDeclaration = [
         for (declaration in configuredType.declaration.memberDeclarations<ValueDeclaration>())
             if(exists annotation = annotations(`EnvVarAnnotation`, declaration))
-                annotation.envName -> declaration
+                sanitizeKey(annotation.envName) -> declaration
     ];
 
-    value [strictFields, optionalFields]
+    value [optionalFields, strictFields]
             = partition(envVarNameToFieldDeclaration,
                         forItem(ValueDeclaration.defaulted));
 
-    function fillParam(<String->ValueDeclaration> envVarNameToFieldDecl) {
-
-        value varName -> fieldDecl = envVarNameToFieldDecl;
-        OpenType openType = fieldDecl.openType;
-        assert(is OpenClassOrInterfaceType openType);
-        
-        if(openType.declaration in {`interface Sequential`, `interface Iterable`},
-            is OpenClassOrInterfaceType typeParameterOpenType = openType.typeArgumentList.first){
-            for (decl->parse in typeParsers) {
-                if(decl == typeParameterOpenType.declaration,
-                    exists var = environment[varName]) {
-                    value list = splitStringList(var);
-                    // tuple() is hack function - it narrows collection type-argument without meta-model.
-                    value res = list.collect(parse).tuple();
-                    return fieldDecl.name -> [varName, res];
-                }
-            }
-
-        } else {
-            for (decl->parse in typeParsers) {
-                if(decl == openType.declaration,
-                    exists var = environment[varName]){
-                    return fieldDecl.name -> [varName, parse(var)];
-                }
-            }
-        }
-        
-        log.error("UNKNOWN OPEN_TYPE: ``openType``");
-        return fieldDecl.name -> [varName, null];
-    }
-
-    value params = strictFields.collect(fillParam);
+    value params = strictFields.collect(fillParam(environment));
 
     if(nonempty unspecified = [for (_->[name, val] in params) if(is Null val) name]) {
         throw EnvironmentVariableNotFoundException(", ".join(unspecified));
     }
 
-    value optionalParams  = optionalFields.collect(fillParam);
+    value optionalParams  = optionalFields.collect(fillParam(environment));
 
     value args = concatenate(params, optionalParams).map((k->v) => k->v[1]);
-    
+
     log.info("args: ``args.string``");
     return configuredType.namedApply(args);
 }
 
+FieldName->[EnvVarName, Anything]
+fillParam (Environment environment)(<String->ValueDeclaration> envVarNameToFieldDecl) {
+
+    value varName -> fieldDecl = envVarNameToFieldDecl;
+    OpenType openType = fieldDecl.openType;
+    value envVarValue = environment.get(varName);
+
+    if(is Null envVarValue) {
+        log.error("Environment variable [``varName``] not found");
+        return fieldDecl.name -> [varName, null];
+    }
+
+    value convertedValue = tryConvertStringToOpenType(envVarValue, openType);
+
+    if(is Null convertedValue) {
+        log.error("Can't convert [``envVarValue``] to ``openType``");
+    }
+
+    return fieldDecl.name -> [varName, convertedValue];
+}

@@ -9,3 +9,10 @@ offline=false
 flatclasspath=false
 autoexportmavendependencies=false
 fullyexportmavendependencies=false
+
+[runtool]
+compile=check
+module=com.github.qdzo.configtest
+
+[testtool]
+compile=check
