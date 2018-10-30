@@ -36,7 +36,7 @@ shared String sanitizeKey(String key) {
           .replace("_", ".")
           .replace("-", ".");
     if(newKey != key) {
-        log.info("sanitizeKey: Warn, key ``key`` has been corrected to ``newKey``");
+        log.debug("sanitizeKey: Warn, key ``key`` has been corrected to ``newKey``");
         return newKey;
     }
   return key;
@@ -47,7 +47,7 @@ shared String sanitizeVal(Anything item) {
     if(is String item) {
         return item;
     }
-    log.info("sanitizeVal: Warn, val ``item else ""`` has been converted to string");
+    log.debug("sanitizeVal: Warn, val ``item else ""`` has been converted to string");
     return item?.string else "";
 }
 

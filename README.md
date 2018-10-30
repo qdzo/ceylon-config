@@ -152,7 +152,7 @@ class Config(
     shared String user = "test-user",
 
     envVar("server.pass")
-    shared String pass = "secret",
+    shared String? pass = null,
 ) {}
 
 shared void run() {
@@ -164,7 +164,7 @@ shared void run() {
 
 Rules to create such config class:
 
-* Fields must be *one* of the basic types (`Boolean`, `Integer`, `Float`, `String`, `Date`, `Time`, `DateTime`) or sequence/iterable of them.
+* Fields must be *one*(or union) of the basic types (`Boolean`, `Integer`, `Float`, `String`, `Date`, `Time`, `DateTime`) or sequence/iterable of them.
 * Fields with default values are treated as `optional` fields, and may not have value in environment.
 * If some variable is not exists in the environment then `EnvironmentVariableNotFoundException` will be thrown while `configure<Type>`.
 
@@ -193,18 +193,30 @@ shared void run() {
 
 ## Changelog
 
-#### 1.0.3
-
-* Replace AssertionErrors with Custom Exceptions
-
-
-#### 1.1.0
+#### 0.2.0
 
 * Improved injector capabilities
    * Add support for union-types (`String|Integer|Null`)
    * Add support for heterogeneous sequences (`[String|Integer*]`)
 * Add internal sanitizers(lowercase) to `envVar` parameter and `get*` methods
     > Now you can call `get*` methods and use `envVar` annotation with camelCase strings
+
+#### 0.1.3
+
+* Replace AssertionErrors with Custom Exceptions
+
+#### 0.1.1
+
+* rename annotation envVar
+
+#### 0.1.0
+
+* Create annotation-based injector
+* Create requirenmentChecker
+
+#### 0.0.1
+
+* Initial release.
 
 ## Licence
 

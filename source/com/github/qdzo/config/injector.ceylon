@@ -2,8 +2,7 @@ import ceylon.collection {
     partition
 }
 import ceylon.language.meta {
-    annotations,
-    type
+    annotations
 }
 import ceylon.language.meta.declaration {
     ValueDeclaration,
@@ -96,10 +95,10 @@ Anything tryConvertStringToOpenType(String stringValue, OpenType openType) {
     case (is OpenClassOrInterfaceType) {
         return if(openType.declaration in {`interface Sequential`, `interface Iterable`})
         then tryConvertStringToSequeceOpenType(stringValue, openType)
-        else tryConvertStringToOneOfOpenTypes(stringValue, [openType]);
+        else tryConvertStringToOneOfOpenType(stringValue, openType);
     }
     case (is OpenUnion) {
-        return tryConvertStringToOneOfOpenTypes(stringValue, openType.caseTypes);
+        return tryConvertUnionTypesWithSpecialOrder(stringValue, openType.caseTypes);
     }
     else {
         log.warn("Not suppported openType: ``openType``");
@@ -116,53 +115,40 @@ Anything tryConvertStringToSequeceOpenType(
     value res = [
         for (stringElement in splitStringList(stringValue))
         if(exists typeArg = openType.typeArgumentList.first)
-        tryConvertStringToOneOfOpenTypes(stringElement, [typeArg])
+        tryConvertStringToOpenType(stringElement, typeArg)
     ];
     return res.tuple();
     // tuple() is hack fn - it narrows collection type-argument without meta-model.
 }
 
+"
+ union types (example: `Integer|String` and `String|Union`)
+ can have different order - and we potentially can build wrong values.
+ in this way we we need special order specified parsers -> generic parsers"
+Anything tryConvertUnionTypesWithSpecialOrder(
+        String stringValue, List<OpenType> caseTypes) {
+
+    value classOrIntefacaes =
+            caseTypes.narrow<OpenClassOrInterfaceType>()*.declaration;
+
+    for (decl->parse in typeParsers) {
+        if(decl in classOrIntefacaes,
+            exists res = parse(stringValue)) {
+            return res;
+        }
+    }
+    log.warn("Can't convert string ``stringValue`` to one of Union type: ``caseTypes``");
+    return null;
+}
+
 "Try convert string to one of common-data-type, that have [[typeParsers]].
 
   > PS: common-data-types - that have `typeParsers`"
-Anything tryConvertStringToOneOfOpenTypes(String stringValue, List<OpenType> openTypes) {
-// TODO: Refactor this ugly part (Vitaly 26.10.18)
-    print("ONEOF: ``stringValue`` oneOF ``openTypes``");
-
-    /*
-       NOTE:
-         union types (example: `Integer|String` and `String|Union`)
-         can have different order - and we potentially can build wrong values.
-         in this way we we need special order specified parsers -> generic parsers
-    */
-    if(openTypes.size > 1) {
-        value classOrIntefacaes = openTypes.narrow<OpenClassOrInterfaceType>()*.declaration;
-        print("classOrIntefacaes: ``type(openTypes)``, ``type(classOrIntefacaes)``");
-        for (decl->parse in typeParsers) {
-            if(decl in classOrIntefacaes,
-                exists res = parse(stringValue)) {
-                print("FOUND: ``res``");
-                return res;
-            }
-        }
-        return null;
+Anything tryConvertStringToOneOfOpenType(String stringValue, OpenClassOrInterfaceType openType) {
+    if(exists parse = typeParsers[openType.declaration]) {
+        return parse(stringValue);
     }
-
-    "At least one openType should exists"
-    assert(exists openType = openTypes.first);
-
-    if(is OpenClassOrInterfaceType openType,
-        exists parse = typeParsers[openType.declaration],
-        exists res = parse(stringValue)) {
-        print("ONEOF: ``stringValue`` is ``openType``: - ``res``");
-        return res;
-    }
-    // if union - call inself with case types
-    if(is OpenUnion openType) {
-        return tryConvertStringToOneOfOpenTypes(stringValue, openType.caseTypes);
-    }
-    print("ONEOF: not found type");
-    log.warn("Can't convert string ``stringValue`` to one of:  ``openTypes``");
+    log.warn("Can't convert string ``stringValue`` to  ``openType``");
     return null;
 }
 
@@ -175,7 +161,8 @@ alias FieldName => String;
 
 "Instantiate class with values taken from environment variables.
  Given class need to annotate it's fields with `envVar` annotation"
-throws(`class EnvironmentVariableNotFoundException`, "when some of the variables not exists in the environment")
+throws(`class EnvironmentVariableNotFoundException`,
+    "when some of the variables not exists in the environment")
 shared T configure<out T>(Environment environment = env) {
 
     value configuredType = `T`;
@@ -195,7 +182,8 @@ shared T configure<out T>(Environment environment = env) {
 
     value params = strictFields.collect(fillParam(environment));
 
-    if(nonempty unspecified = [for (_->[name, val] in params) if(is Null val) name]) {
+    if(nonempty unspecified =
+            [for (_->[name, val] in params) if(is Null val) name]) {
         throw EnvironmentVariableNotFoundException(", ".join(unspecified));
     }
 
