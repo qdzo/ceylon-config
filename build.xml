@@ -328,6 +328,27 @@
 
     <!-- ************************************************************************************************ -->
 
+    <target name="publish-herd">
+        <condition property="herd.pass" value="${pass}">
+            <isset property="pass"/>
+        </condition>
+
+        <condition property="herd.upload" value="${upload}">
+            <isset property="upload"/>
+        </condition>
+
+        <fail message="specify herd password via -Dpass" unless:set="herd.pass"/>
+
+        <ceylon-compile out="https://modules.ceylon-lang.org/uploads/${herd.upload}/repo/" user="qdzo" pass="${herd.pass}">
+            <module name="${run.module.name}"/>
+        </ceylon-compile>
+        <ceylon-doc out="https://modules.ceylon-lang.org/uploads/${herd.upload}/repo/" user="qdzo" pass="${herd.pass}">
+            <module name="${run.module.name}"/>
+        </ceylon-doc>
+    </target>
+
+    <!-- ************************************************************************************************ -->
+
 
     <target name="all-quick" description="Runs full cycle(without clean)">
         <antcall target="fetch"/>
