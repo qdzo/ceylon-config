@@ -26,7 +26,7 @@ Each next level overrides definitions from earlier levels.
 Add dependency to your `module.ceylon` file
 
 ```ceylon
-import com.github.qdzo.config "0.1.3";
+import com.github.qdzo.config "0.2.0";
 ```
 
 ## Usage
