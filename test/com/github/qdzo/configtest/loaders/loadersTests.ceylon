@@ -1,13 +1,18 @@
+import ceylon.interop.java {
+    CeylonIterable
+}
+import ceylon.test {
+    test,
+    assertEquals
+}
+
 import com.github.qdzo.config.loaders {
     systemPropsLoader,
     systemEnvLoader,
     JsonFileLoader,
     TomlFileLoader
 }
-import ceylon.test {
-    test,
-    assertEquals
-}
+
 import java.lang {
     System
 }
@@ -22,7 +27,9 @@ shared void systemPropsLoaderShouldLoadRightPropsSize() {
 test
 shared void systemEnvLoaderShouldLoadRightVarsSize() {
     value sysEnv = systemEnvLoader.load;
-    value expectedSize = System.getenv().size();
+    value expectedSysEnv = CeylonIterable(System.getenv().keySet());
+    value uniqSanitizedExpectedSysEnv = set(expectedSysEnv.map((k) => k.toLowerCase()));
+    value expectedSize = uniqSanitizedExpectedSysEnv.size;
     assertEquals(sysEnv.size, expectedSize);
 }
 
