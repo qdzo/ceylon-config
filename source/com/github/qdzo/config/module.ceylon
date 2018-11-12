@@ -27,7 +27,7 @@
    Add dependency to your `module.ceylon` file
 
    ```ceylon
-   import com.github.qdzo.config "0.1.3";
+    import com.github.qdzo.config "0.2.0";
    ```
 
    ## Usage
@@ -44,7 +44,9 @@
    {
      "database": {
        "host": "localhost",
-       "port": 5144
+        "port": 5144,
+        "user": "admin",
+        "password": "secret"
      }
    }
    ```
@@ -131,34 +133,10 @@
 
    ## Advanced
 
-   ### Using env in non-`run` method
-
-   If you want to use `env` variables somewhere in the project and you want to be sure that variable present at application startup,
-   you would annotate your method with `requiredEnv` annotation and call `checkEnvRequirements` in run method.
-
-   ```ceylon
-   requiredEnv("web.host", "web.port") // method required some envirnment variables
-   shared startServer() {
-       String host = env.getString("web.host");
-       Integer port = env.getInteger("web.port");
-       value server = newServer({});
-       server.start(SocketAddress(host, port));
-   }
-
-
-   shared void run() {
-       checkEnvRequirements(`module`); // search for `requredEnv` annotaion in current-module and check env existence
-       ...
-       Thread.sleep(10_000)
-       serverStart();
-   }
-   ```
-
-
    ### Using annotations to setup config-Classes and instantiate them
 
    It's convenient to use some class as configuration.
-   You may to annotate fields of that class with `envVar("varname")` annotation
+   You can annotate fields of that class with `envVar("varname")` annotation
    and then get instantce of that class with specified parameters from the environment variables.
 
    Example:
@@ -175,7 +153,7 @@
        shared String user = "test-user",
 
        envVar("server.pass")
-       shared String pass = "secret",
+       shared String? pass = null,
    ) {}
 
    shared void run() {
@@ -187,9 +165,32 @@
 
    Rules to create such config class:
 
-   * Fields must be *one* of the basic types (`Boolean`, `Integer`, `Float`, `String`, `Date`, `Time`, `DateTime`) or sequence/iterable of them.
+   * Fields must be *one*(or union) of the basic types (`Boolean`, `Integer`, `Float`, `String`, `Date`, `Time`, `DateTime`) or sequence/iterable of them.
    * Fields with default values are treated as `optional` fields, and may not have value in environment.
    * If some variable is not exists in the environment then `EnvironmentVariableNotFoundException` will be thrown while `configure<Type>`.
+
+
+   ### Using env in non-`run` method
+
+   If you want to use `env` variables somewhere in the project and you want to be sure that variable present at application startup,
+   you would annotate your method with `requiredEnv` annotation and call `checkEnvRequirements` in run method.
+
+   ```ceylon
+   requiredEnv("web.host", "web.port") // method required some envirnment variables
+   shared startServer() {
+       String host = env.getString("web.host");
+       Integer port = env.getInteger("web.port");
+       value server = newServer({});
+       server.start(SocketAddress(host, port));
+   }
+
+   shared void run() {
+       checkEnvRequirements(`module`); // search for `requredEnv` annotaion in current-module and check env existence
+       ...
+       Thread.sleep(10_000)
+       serverStart();
+   }
+   ```
 
 """
 
