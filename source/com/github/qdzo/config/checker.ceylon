@@ -17,7 +17,9 @@ alias PossibleDeclaraitons => FunctionDeclaration|ValueDeclaration|ClassDeclarat
 "annotation to mark functions that require
  environment variables for their proper work"
 shared final annotation
-class RequireEnvAnnotation(shared String* envs) satisfies
+class RequireEnvAnnotation(
+        "Environment variable names, which will be checked for existence"
+        shared String* envs) satisfies
         OptionalAnnotation<RequireEnvAnnotation,
         FunctionDeclaration|ValueDeclaration|ClassDeclaration> {}
 

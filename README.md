@@ -12,8 +12,8 @@ Configuration is resolved in next order:
 
 1. config `json/toml` file in current dir 
 2. profile `json/toml` file
-3. Environment variables
-4. custom config file `json/toml`, specified by cmd parameter `--config` 
+3. custom config file `json/toml`, specified by cmd parameter `--config` 
+4. Environment variables
 5. cmd parameters
 6. java-system properties
 
@@ -192,6 +192,12 @@ shared void run() {
 ```
 
 ## Changelog
+
+#### 0.2.1
+
+* Fix correct order of config loading.
+    * Swap 'set' with 'HashSet' and 'linked stability'
+* Swap config loading priority of custom config and env variables
 
 #### 0.2.0
 

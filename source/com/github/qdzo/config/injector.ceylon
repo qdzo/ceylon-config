@@ -28,7 +28,12 @@ import ceylon.time.iso8601 {
 "annotation to mark fields that will be configured
  from environment"
 shared final annotation
-class EnvVarAnnotation(shared String envName) satisfies
+class EnvVarAnnotation(
+        "Environment variable name which will
+         be bind to annotated field by `configure` method.
+
+         - Name example: `db.server.name`"
+        shared String envName) satisfies
         OptionalAnnotation<EnvVarAnnotation, ValueDeclaration> {}
 
 "annotation to mark attributes(fields) that require

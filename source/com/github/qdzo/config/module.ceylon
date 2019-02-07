@@ -13,8 +13,8 @@
 
    1. config `json/toml` file in current dir
    2. profile `json/toml` file
-   3. Environment variables
-   4. custom config file `json/toml`, specified by cmd parameter `--config`
+   3. custom config file `json/toml`, specified by cmd parameter `--config`
+   4. Environment variables
    5. cmd parameters
    6. java-system properties
 
@@ -196,7 +196,7 @@
 
 native("jvm")
 //module com.github.qdzo.config "0.1.4-SNAPSHOT" {
-module com.github.qdzo.config "0.2.0" {
+module com.github.qdzo.config "0.2.1" {
     import java.base "8";
     import ceylon.interop.java "1.3.3";
     import ceylon.file "1.3.3";

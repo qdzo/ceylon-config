@@ -6,6 +6,10 @@ import com.github.qdzo.config.loaders {
     JsonFileLoader,
     TomlFileLoader
 }
+import ceylon.collection {
+    HashSet,
+    linked
+}
 /*
     loads config.json
     loads config.toml
@@ -21,13 +25,14 @@ import com.github.qdzo.config.loaders {
  see(`value loaders`)
 shared late Environment env = Environment(loaders);
 
-Set<Loader> _loaders = set {
+Set<Loader> _loaders = HashSet {
+    stability = linked;
     defaultJsonConfigLoader,
     defaultTomlConfigLoader,
     profileJsonConfigLoader,
     profileTomlConfigLoader,
-    systemEnvLoader,
     customConfigFileLoader,
+    systemEnvLoader,
     cmdParamsLoader,
     systemPropsLoader
 };
